@@ -1,0 +1,8 @@
+git config --global http.cookiefile "E:\go_build\.gitcookies"
+powershell -noprofile -nologo -command Write-Output "go.googlesource.com`tFALSE`t/`tTRUE`t2147483647`to`tgit-1728565484.qq.com=1/PKhtsx3RrZcuTuXQSDskO-sYrsCNRzuynU94CrLAn_U`ngo-review.googlesource.com`tFALSE`t/`tTRUE`t2147483647`to`tgit-1728565484.qq.com=1/PKhtsx3RrZcuTuXQSDskO-sYrsCNRzuynU94CrLAn_U" >>"E:\go_build\.gitcookies"
+
+
+如何成为go贡献者:
+1. 拥有google账号:https://myaccount.google.com/
+2. 拥有github账号:https://github.com/
+3. 

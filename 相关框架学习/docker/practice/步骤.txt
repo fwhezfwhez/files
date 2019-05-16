@@ -1,0 +1,121 @@
+1. 新建Dockerfile，内容:
+```
+# Use an official Python runtime as a parent image
+FROM python:2.7-slim
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --trusted-host pypi.python.org -r requirements.txt
+
+# Make port 80 available to the world outside this container
+EXPOSE 80
+
+# Define environment variable
+ENV NAME World
+
+# Run app.py when the container launches
+CMD ["python", "app.py"]
+```
+
+2. 新建requirements.txt,内容:
+```
+Flask
+Redis
+```
+
+3. 新建app.py,内容:
+```
+from flask import Flask
+from redis import Redis, RedisError
+import os
+import socket
+
+# Connect to Redis
+redis = Redis(host="redis", db=0, socket_connect_timeout=2, socket_timeout=2)
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    try:
+        visits = redis.incr("counter")
+    except RedisError:
+        visits = "<i>cannot connect to Redis, counter disabled</i>"
+
+    html = "<h3>Hello {name}!</h3>" \
+           "<b>Hostname:</b> {hostname}<br/>" \
+           "<b>Visits:</b> {visits}"
+    return html.format(name=os.getenv("NAME", "world"), hostname=socket.gethostname(), visits=visits)
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=80)
+```
+
+4. 在3个文件的共同目录下，执行
+docker build -t friendlyhello
+
+完毕后，即可在
+docker image ls 中找到 friendlyhello 镜像
+
+执行
+`docker run -d -p 4000:80 friendlyhello`  后台运行容器,去掉-d则在当前cmd窗口下运行
+
+浏览器输入  localhost:4000 即进入了 该服务
+关闭:
+`docker stop 该容器name或id`
+
+5. 上传分享该镜像
+`docker login`
+
+`docker tag friendlyhello fwhezfwhez/get-started:part2`    将镜像friendlyhello打包进本地仓库 'fwhezfwhez/get-started:part2',不要求该仓库已存在
+`docker push  fwhezfwhez/get-started:part2` 仓库推送到dockerhub
+
+6. 拉取并执行
+`docker pull fwhezfwhez/get-started:part2`
+`docker image ls`
+`docker run -d -p 4000:80 fwhezfwhez/get-started:part2`  //如果不带tag，则会执行 fwhezfwhez/get-started:latest 不存在
+
+// 第二部分，基于service操作docker
+7. 通过容器制作service
+新建 docker-compose.yml
+```yml
+version: "3"
+services:
+  web:
+    # replace username/repo:tag with your name and image details
+    image: fwhezfwhez/get-started:part2
+    deploy:
+	  # 分片数量决定单服务时容器数量
+      replicas: 5
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "4000:80"
+    networks:
+      - webnet
+networks:
+  webnet:
+```
+`docker swarm init` 初始化环境
+`docker stack deploy -c docker-compose.yml getstartedlab` 部署并发布成服务
+`docker service ls` 列表服务,目前只发布了一个叫getstartedlab_web的服务,每个单服务由5个容器组成
+`docker container ls` 可以看到该服务所部署中的5个容器
+`docker stack rm getstartedlab` 下架服务
+`docker swarm leave --force` 移除swarm 环境
+
+//第三部分，单机变蜂群
+`docker-machine create -d hyperv --hyperv-virtual-switch "myswitch" myvm1`
+`docker-machine create -d hyperv --hyperv-virtual-switch "myswitch" myvm2`  //创建两个虚拟机
+
+// 错误列表与解决
+`Hyper-V PowerShell Module is not available` 下载64位的，替换C:\Program Files\Docker\Docker\resources\bin”目录下的“docker-machine.exe”的文件.
+`Hyper-v commands have to be run as an Administrator` 以管理员权限运行cmd,或者找到git-bash.exe 右键-兼容性-以管理员身份运行

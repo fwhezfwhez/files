@@ -1,0 +1,20 @@
+https://www.afdf.com/v1/voters/GET/voters:?id=2
+
+restful标准
+1.协议
+2.域名
+3.版本号
+4.路径终端
+5.请求方式
+6.用户可请求对象
+7.请求参数
+
+错误消息
+{
+    error: "Invalid API key"
+ }
+ 
+ post 创建一个新的对象，多post会出现多个对象，即使相同
+ put  维护一个对象，完全更新这个对象
+ patch 维护一个对象的一部分，更新部分
+ 

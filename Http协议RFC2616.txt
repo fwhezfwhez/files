@@ -1,0 +1,49 @@
+一.RFC HTTP协议
+1.HTTP 超文本传输协议 分布协作 无状态
+响应链中的几种媒介：代理，网关和隧道。
+代理是转发代理，网关是接收代理
+
+2.100 Continue
+101 Swithcing protocol
+200 OK
+201 Created
+202 Accepted
+203 Non-Authoritative Information
+204 No Conent 
+205 Reset Content
+206 Partial Content
+300 Multiple Choices
+301 Moved Permanently
+302 Found
+304 Not Modified
+305 Use Proxy
+307 Temporary Redirect
+400 Bad Request
+401 Unautorized
+402 Payment Required
+403 Forbidden
+404 Not Found
+405 Method Not Allowed
+406 Not Acceptable
+407 Proxy Authentication Required
+408 Request Time-out
+409 Conflict
+410 Gone
+411 Length Required
+412 Precondition Failed
+413 Request Entity too large
+414 Request-URI too large
+415 Unsupported Media type
+416 Requested range not satisfiable
+417 expectation failed
+500 Internal server error
+501 not implemented
+502 bad gateway
+503 service unavailable 
+504 gateway time-out
+505 http version not supported
+
+3.永久性的连接可以发起管道连接
+  代理服务器必须和原始服务器永久连接，代理服务器禁止和客户端永久连接
+
+二.RFC 2396 URL语法

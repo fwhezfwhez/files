@@ -1,0 +1,26 @@
+1. go fmt
+go fmt main.go 
+格式化main.go并保存进文本
+
+go bug
+浏览器打开bug提交页面
+
+2. go mod
+go mod:
+download    download modules to local cache
+edit        edit go.mod from tools or scripts
+graph       print module requirement graph
+init        initialize new module in current directory
+tidy        add missing and remove unused modules
+vendor      make vendored copy of dependencies
+verify      verify dependencies have expected content
+why         explain why packages or modules are needed
+
+
+go mod init x/x  左斜杠
+go mod tidy
+go mod edit -fmt xxx.mod  格式化
+go mod edit -module xx.mod <path>  设置mod路径
+go mod edit -json xx.mod   展示结果
+
+3. pprof

@@ -1,0 +1,92 @@
+http://www.yiibai.com/postgresql/postgresql-datatypes.html
+
+1.创建数据库createdb -U ft mydb2
+创建成功
+  连接数据库  psql mydb2 ft
+连接成功
+
+2.查看当前所有数据库\l
+
+3.删除数据库drop database testdb;
+
+4.建表和crud
+CREATE TABLE public.student2
+(
+  id integer NOT NULL,
+  name varchar(20),
+  CONSTRAINT student2_pkey PRIMARY KEY (id)
+)
+;
+//增加
+insert into public.student2(id,name) values(1,'ft');
+
+insert into public.student2(id,name) values(2,'ft2');
+//查询
+select id as 序号,name as 姓名 from public.student2;
+//修改
+update public.student2 set id=3,name='ft3' where id=2;
+//删除
+delete from public.student2 where id=2;
+
+//分页
+select * from public.user limit 4 offset 3
+
+5.如何程序链接数据库:
+驱动:org.postgresql.Driver
+url:host=localhost port=5432 user=postgres  password=123 dbname=test sslmode=disable
+
+ psql -U postgres 打开自带的命令栏
+ 使用psql登录某个数据库，以哪个角色:
+ psql test postgres;   登录test数据库，角色是postgres，输入后需要输入口令
+ \q 和 ctrl+c可退出
+ 
+ 6.导入导出数据
+ psql -U postgres
+ copy xm_coupon(coupon_id) from '/tmp/coupon_id.csv'
+with (format csv,header true,quote '"',DELIMITER ',',encoding 'UTF_8');、
+ 导出:
+ ****:草泥马的斜杠
+ \c medium
+ \copy medium to '/tmp/medium_medium.csv' delimiter ',' csv header encoding 'UTF_8';
+导入:
+copy medium_medium from '/tmp/medium_medium.csv'
+with (format csv,header true,quote '"',DELIMITER ',',encoding 'UTF_8');
+
+
+7.聚合与单列同时查询
+select user_id,sum(imp),sum(clk),sum(cost),report_date from report_app where bundle_id='11' or bundle_id='7' group by user_id,report_date 
+
+8.嵌套查询
+select u.cid,u.userid,sum(t_imp),sum(t_clk),sum(t_uclk),sum(t_cost),report_date from urlinfo as u,
+     (select bundle_id,cid,t_imp, t_clk, t_uclk,t_cost, report_date from (select bundle_id,sum(imp) as t_imp,sum(clk) as t_clk,sum(uclk) as t_uclk,sum(cost) as t_cost,report_date 
+        from report_app 
+            group by bundle_id,report_date) as tmp, urlinfo 
+                where tmp.bundle_id = appid 
+                    and report_date = '2018-06-01') as tmp2 
+                        where u.cid=tmp2.cid and u.appid=tmp2.bundle_id
+                            group by u.cid,u.userid,report_date
+							
+							
+9.select cid,username,sum(t_imp), sum(t_clk), sum(t_uclk),sum(t_cost), report_date from (select bundle_id,sum(imp) as t_imp,sum(clk) as t_clk,sum(uclk) as t_uclk,sum(cost) as t_cost,report_date 
+      from report_app group by bundle_id,report_date) as tmp, urlinfo,tuser 
+       where tmp.bundle_id = appid and urlinfo.userid=tuser.userid and report_date between '2018-06-01' and '2018-06-01' and cid='1111' and username='test'
+         group by cid,username,report_date 
+
+10.去重
+select cid,username,sum(t_imp) as show, sum(t_clk) as clk, sum(t_uclk) as uclk,sum(t_cost) as cost, report_date from 
+     (select distinct cid,username,appid from medium_tuser as u,medium_urlinfo as url where url.userid=u.userid) as tmp1,
+     (select bundle_id,sum(imp) as t_imp,sum(clk) as t_clk,sum(uclk) as t_uclk,sum(cost) as t_cost,report_date from report_app group by bundle_id,report_date) as tmp2
+where tmp1.appid=tmp2.bundle_id and report_date='2018-05-31' group by cid,username,report_date  		 
+
+11.联表查询的每个交叉字段都要联，不然就会造成数据量加倍
+
+12.使用exist 和not exist 代替in和not in
+select id from a  where exists(select tid from b where sid=123 and tid=a.tid) and not exists(select tid from c where sid=123 and tid=a.tid) 这个查询的速度变成12秒左右
+
+使用any代替exist
+换成
+ select id from a where tid =any(select tid from b where sid=123 and not exists (select tid from c where sid=123 and tid=b.tid))  变成1.3秒左右
+ 
+使用临时表
+with foo as (select tid from b where sid=123 and not exists (select tid from c where sid=123 and tid=b.tid))
+select id from a where exists (select * from foo where tid=a.tid)   速度变成0.5秒以内

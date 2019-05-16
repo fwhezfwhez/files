@@ -1,0 +1,121 @@
+**1.标题的书写**
+
+
+#一级标题
+##二级标题 也可以在文字下方接===或者----来表明是2级标题
+###三级标题
+####四级标题
+#####五级标题
+######六级标题
+
+
+**2.列表书写**
+
+
+1. 有序列表1
+2.  有序列表2
+3. 有序列表3
+
+
+- 无序列表1
+
+- 无序列表2
+  - 无序列表2.1
+  - 无序列表2.2 
+
+
+**3.引用**
+>引用了xxx的文档
+
+
+**4.粗斜体**
+
+**加粗**
+*斜体*
+***粗斜体***
+
+
+**5.添加链接**
+1.[百度](http://www.baiducom/)
+2.[百度][id]
+[id]: http://www.baidu.com/ 
+3.<http://www.baidu.com/>
+
+**6.代码**
+1.<java>
+        echo “hello world";
+ </java>
+2.`echo "hello world"`
+
+
+**7.分割和删除**
+
+~~abcdefghijk~~
+mlnopq
+1.
+
+***************************
+2.
+
+----------------------------------------------
+3.
+
+_____________________________________________
+
+
+**8.代码以及高亮
+```java
+ System.out.Println("hello java")
+```
+```go
+fmt.Println("hello go")
+```
+```ruby
+require 'redcarpet'
+markdown = Redcarpet.new("Hello ruby!")
+puts markdown.to_html
+```
+```sql
+select * from user
+```
+
+
+**9.表格**
+| 班级 | 人数 | 学费 |
+| :----------- |:-------------:|--:|
+| 高一2班 | 44  | $1600 |
+| 高一3班 | 33|  $1233      |
+| 高一4班 | 43 | $1333  |
+
+**10.公式**
+1.块公式
+$$ x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
+
+$$y=x+7$$
+
+2.行公式
+$\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$
+$y=x+7$
+
+**11.UML模型图**
+1.时序图
+```sequence
+UserAction->UserService: Login(username,password) 
+UserService->UserDao:GetUser(username,password)
+UserDao-->UserService:User user
+UserService-->UserAction: User user
+```
+
+2.流程图
+```flow
+st=>start: 用户输入
+e=>end: 返回用户
+op=>operation: 接收用户参数
+cond=>condition: 是否存在该用户？
+
+st->op->cond
+cond(yes)->e
+cond(no)->op
+
+```
+

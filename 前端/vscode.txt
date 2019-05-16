@@ -1,0 +1,15 @@
+1.vscode如何排版
+alt shift f
+2.ctrl p ，根据输入文件名跳到指定文件位置
+
+3.shift f12  找到一个变量所有的引用
+
+4.安装beautify插件，格式化代码
+      instant markdown，markdown语法工具
+	  
+5. ctrl shift y 调出控制台
+
+6.ctrl shift p 可以执行一些配置命令，比如 eslint create	  
+  task - others->生成一个tasks.json
+  
+7, 输入！tab 自动生成一坨html代码

@@ -1,0 +1,58 @@
+github.com/garyburd/redigo
+https://godoc.org/github.com/garyburd/redigo/redis#pkg-variables
+
+reply,err:=conn.Do("APPEND","key","value")
+
+1.命令格式 Send,Do...("命令","key","value")
+c.Send("MULTI")
+c.Send("INCR", "foo")
+c.Send("INCR", "bar")
+r, err := c.Do("EXEC")
+
+拨号:
+c, err := redis.Dial("tcp", ":6379")
+if err != nil {
+    // handle error
+}
+defer c.Close()
+
+
+2.pubsubconnection的用法，新型的connection
+psc := redis.PubSubConn{Conn: c}
+psc.Subscribe("example")
+for {
+    switch v := psc.Receive().(type) {
+    case redis.Message:
+        fmt.Printf("%s: message: %s\n", v.Channel, v.Data)
+    case redis.Subscription:
+        fmt.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
+    case error:
+        return v
+    }
+}
+
+2.结果类型转换
+   2.1 布尔类型Bool  //相应的有Float64,Int,Int64Map,Ints,String
+    c, err := dial()
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    defer c.Close()
+
+    c.Do("SET", "foo", 1)
+    exists, _ := redis.Bool(c.Do("EXISTS", "foo"))
+    fmt.Printf("%#v\n", exists)
+
+    2.2 Ints
+    c, err := dial()
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    defer c.Close()
+
+    c.Do("SADD", "set_with_integers", 4, 5, 6)
+    ints, _ := redis.Ints(c.Do("SMEMBERS", "set_with_integers"))
+    fmt.Printf("%#v\n", ints)
+

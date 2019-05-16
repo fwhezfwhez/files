@@ -1,0 +1,297 @@
+swagger,api规范文档的一股清流，能实现多个格式api文档转换
+要做到工具的可用以及可控
+
+本地swagger:
+cmd- cd E:\swagger_editor\swagger-editor
+     npm start
+第一次使用需要先在该路径下npm install
+
+
+
+**swagger 如何使用**
+1. go get -u github.com/go-swagger/go-swagger/cmd/swagger
+2. 跳到该路径，go build  生成一个swagger.exe,把该路径放到path
+3. 新建工程test_swagger,在该路径下,执行
+  swagger init spec \
+  --title "A Todo list application" \
+  --description "From the todo list tutorial on goswagger.io" \
+  --version 1.0.0 \
+  --scheme http \
+  --consumes application/io.goswagger.examples.todo-list.v1+json \
+  --produces application/io.goswagger.examples.todo-list.v1+json
+4.执行上步之后，生成了一个例子swagger.yaml,
+
+5.优化这个例子，实例:
+swagger: "2.0"
+info:
+  description: From the todo list tutorial on goswagger.io
+  title: A Todo list application
+  version: 1.0.0
+consumes:
+- application/io.goswagger.examples.todo-list.v1+json
+produces:
+- application/io.goswagger.examples.todo-list.v1+json
+schemes:
+- http
+paths:
+  /:
+    get:
+      tags:
+        - todos
+      parameters:
+        - name: since
+          in: query
+          type: integer
+          format: int64
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        200:
+          description: list the todo operations
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/item"
+        default:
+          description: generic error response
+          schema:
+            $ref: "#/definitions/error"
+definitions:
+  item:
+    type: object
+    required:
+      - description
+    properties:
+      id:
+        type: integer
+        format: int64
+        readOnly: true
+      description:
+        type: string
+        minLength: 1
+      completed:
+        type: boolean
+  error:
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+
+6.保存后，在该路径执行swagger generate server -A swagger_test -f ./swagger.yml    **-A 描述main.go所在的包名**
+即完成了服务端代码的实现
+
+7.在生成的项目todo-list/main.go 路径下，go run main.go ,把缺失的包，go get下来，拿不到的包自己想办法.
+
+8.如何通过json文件一件生成model
+swagger generate model -f VO.yml -m ./models/vo       **必须用swagger,info,paths 三个来定位项目**
+swagger generate model
+      -f, --spec=                  the spec file to use (default swagger.{json,yml,yaml})
+      -a, --api-package=              the package to save the operations (default: operations)
+      -m, --model-package=            the package to save the models (default: models)
+      -s, --server-package=           the package to save the server specific code (default: restapi)
+      -c, --client-package=           the package to save the client specific code (default: client)
+      -t, --target=                   the base directory for generating the files (default: ./)
+      -T, --template-dir=             alternative template override directory
+      -C, --config-file=              configuration file to use for overriding template options
+      -r, --copyright-file=           copyright file used to add copyright header
+          --existing-models=          use pre-generated models e.g. github.com/foobar/model
+          --additional-initialism=    consecutive capitals that should be considered intialisms
+      -n, --name=                     the model to generate
+          --skip-struct               when present will not generate the model struct
+          --dump-data                 when present dumps the json for the template generator instead of generating files
+          --skip-validation           skips validation of spec prior to generation
+
+对一个param的属性有: name,in,required/default,description,type,minimum,maximum,allowEmptyValue
+####与consumes相对的####
+ produces:
+        - image/png
+        - image/gif
+        - image/jpeg
+        - application/json
+        - application/x-yaml
+####设置form属性####
+post:
+ ...
+ consumes:
+        - application/x-www-form-urlencoded								
+		- application/json
+ ...
+  parameters:
+        - name: username
+          in: formData					/query/body/path/formData
+
+1.####常见的返回形式####
+
+200:
+          description: A Person
+          schema:
+            $ref: "#/definitions/Person"
+404:
+          description: The Person does not exists.
+500:
+          description: An unexpected error occured.
+          schema:
+				
+2.####定义definition,复用####
+definitions:
+  Person:
+    required:
+      - username
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      username:
+        type: string
+  Persons:
+    type: array
+    items:
+      $ref: "#/definitions/Person"
+	  
+2.1 ####重用的第二种方式:炒鸡方便
+responses:
+  Standard500ErrorResponse:
+    description: An unexpected error occured.
+    schema:
+      $ref: "#/definitions/Error"
+...
+500:
+          $ref: "#/responses/Standard500ErrorResponse"
+...
+				
+####POST####
+ post:
+      summary: Creates a person
+      description: Adds a new person to the persons list.
+      parameters:
+        - name: person
+          in: body
+          description: The person to create.
+          schema:
+            $ref: "#/definitions/Person"
+      responses:
+        204:
+          description: Persons succesfully created.
+        400:
+          description: Persons couldn't have been created.
+
+3.####路径级别参数####即get和delete都用到这个参数
+  /persons/{username}:
+    parameters:
+      - name: username
+        in: path
+        required: true
+        description: The person's username
+        type: string
+
+    get:...
+	delete:...
+	
+3.1####参数复用####
+parameters:
+  username:
+    name: username
+    in: path        
+    required: true
+    description: The person's username
+    type: string
+  pageSize:
+    name: pageSize
+    in: query
+    description: Number of persons returned
+    type: integer
+  pageNumber:
+    name: pageNumber
+    in: query
+    description: Page number
+    type: integer
+	
+3.2####allOf的使用，可以不仅在根节点挖掘，还能进入内部挖掘，即全局挖掘####Persons和Paging的定义不一定在全局根节点
+PagedPersons:
+    allOf:
+      - $ref: "#/definitions/Persons"
+      - $ref: "#/definitions/Paging"
+	  
+4. ####消息头数据####
+  userAgent:
+    name: Authorization
+    type: string
+    in: header
+    required: true
+	
+	
+5.####readOnly#####只在返回结果中存在
+Person:
+    required:
+      - username
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      username:
+        type: string
+        pattern: '[a-z0-9]{8,64}'
+        minLength: 8
+        maxLength: 64
+      dateOfBirth:
+        type: string
+        format: date
+      lastTimeOnline:
+        type: string
+        format: date-time
+        readOnly: true
+6. ####三种鉴权#### basic apiKey oauth2
+
+7. ####标签#####
+  /js-less-consumer-persons:
+    parameters:
+      - $ref: '#/parameters/userAgent'
+    post:
+      summary: Creates a person
+      description: For JS-less partners
+      operationId: createUserJS
+      deprecated: true
+      tags:
+        - JSLess
+        - Persons
+		
+8. ####多行描述####
+description: |
+	
+	
+	
+	
+实例：
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

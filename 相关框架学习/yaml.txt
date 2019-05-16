@@ -1,0 +1,35 @@
+1.map
+age : 9
+name : ft
+或者{age:9,name:ft}
+
+2.数组
+- a
+- b
+或者[a,b]
+
+3.嵌套
+#map in map
+document:
+  name: ft
+  age: 9
+  sal:7000
+
+#list in map
+jointNames:
+  [ft,ft2,ft3]
+或者
+jointNames:
+  - ft
+  - ft2
+  - ft3
+#list in list
+[[1,2,3],[4,5,6]]
+
+#map in list
+-
+  id: 1
+  name: ft
+-
+  id:2
+  name:ft2

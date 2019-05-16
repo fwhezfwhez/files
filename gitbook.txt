@@ -1,0 +1,15 @@
+1. brew install node
+2. sudo npm install gitbook-cli -g
+3. gitbook -V  查看是否安装成功
+4. sudo npm install calibre -g
+5. sudo npm install ebook-convert -g
+6. 安装calibre应用版,把应用图标拖拽进Application
+7. 添加path sudo ln -s /Applications/calibre.app/Contents/MacOS/ebook-convert /usr/local/bin
+   如果提示 file 已存在，则 sudo rm /usr/local/bin/ebook-convert,再添加一遍上面的命令(这一步很有必要)
+
+同时部署多本书:
+gitbook serve --lrport 35288 --port 4001 /path2/your_another_doc_dir/
+gitbook serve --lrport 35288 --port 4001 /path2/your_another_doc_dir/
+
+部署单本：
+gitbook serve /path2/your_another_doc_dir/

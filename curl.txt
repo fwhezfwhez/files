@@ -1,0 +1,24 @@
+1.curl "www.baidu.com"  抓取网页内容
+
+2.mingw64粘贴  shift insert
+
+3.get请求，同1 curl "localhost:8989/"
+
+4.
+git.xq5.com
+omitempty          //Docs string `json:"docs,omitempty"`不存在该属性时不输出
+  flag            //命令行格式工具
+  toml   xxx.toml //配置框架
+   sqlx         //orm轻框架
+   mark dwon   //注释工具
+  jwt      //数字签名middleware
+   cors   //处理请求跨域过滤
+   swagger  //生成api文档工具
+   redis    //缓存服务  --序列化
+  supervisor   //进程管理工具，不会用
+  交叉编译    //跨系统编译概念
+{
+ status：1
+  msg："success"
+  data: 
+}

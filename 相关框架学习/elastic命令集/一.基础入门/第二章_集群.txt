@@ -1,0 +1,8 @@
+引用:
+https://www.elastic.co/guide/cn/elasticsearch/guide/current/important-configuration-changes.html#unicast 单播，集群时的配置
+**单机多node时，需要把copy的es实例中的data文件夹删除，不然会报id重复错误，内涵的logstash的id冲突!**
+
+
+GET /_cluster/health
+
+GET  /_cat/shards

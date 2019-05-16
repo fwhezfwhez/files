@@ -1,0 +1,28 @@
+文档链接: https://micro.mu/docs/toolkit.html
+github连接： https://github.com/micro/micro
+
+1. dependency:
+protoc.exe
+protoc-gen-go.exe
+protoc-gen-micro.exe
+consul
+
+2. go build $GOPATH/src/github.com/micro/micro
+产出 micro.exe
+
+3. 
+# 启动consul
+consul agent -dev
+
+# 启动micro
+cd $GOPATH/test_X
+micro new test_micro2
+cd test_micro2/
+protoc --proto_path=. --micro_out=. --go_out=. proto/example/example.proto   
+  
+go run main.go
+
+# micro命令簇
+micro list services  展示已经micro开启的微服务
+micro get service go.micro.srv.test_micro2   获得该微服务的信息
+micro call go.micro.test_micro2 Example.Call '{"name": "John"}'   以客户端调用服务端的Call()方法

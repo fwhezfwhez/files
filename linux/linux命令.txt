@@ -1,0 +1,87 @@
+1.ls -al  显示文件属性 (list all)
+[权限][连接][拥有者][用户组][容量][修改日期][文件名]
+
+2.chgrp root test.txt  [root下]  //将文件所属用户组修改成root
+  chown root test.text           //修改文件所有者
+
+3.cp test.txt test2.txt  //复制一份和test相同的拷贝，命名为test2.txt
+
+4.chmod 777 test2.txt   //修改test2的权限数字 
+
+5.cat test.txt        //读出test.txt的内容
+
+6.cd - 前一个工作目录 ~目前用户身份所在 主文件夹 ~account 用户account的主文件夹
+
+7.pwd 显示当前目录路径  mkdir 创建目录 rmdir 删除空目录,Tab显示路径下的文件
+  mv
+
+8.alias lm='ls -al'
+  命令别名，用lm替换右边的
+
+9.通过type 判断是否为内置命令
+type cd
+cd is a shell builtin
+
+10.echo $HOME  //显示变量值
+   引号内也支持el表达式
+   name="this is $HOME"
+   echo name
+   PATH="$PATH":/home/bin  //内容追加
+   export PATH //生成环境变量，可以被外用
+   系统默认变量全大写，用户自定义的小写
+   unset name  //取消变量的使用
+11.ls -l `locate contab`//使用反引号表示命令顺序，先执行反引号里的
+12.查看系统32位还是64位:getconf LONG_BIT
+13.删除所有文件:rm go -r -f
+11.如何下载，解压
+wget xxxxxxxxxxxxxxxxx
+tar -zxvf 文件名
+12.如何修改环境变量
+vim  /etc/profile
+在最后一行加上:
+export PATH=/usr/local/go/bin:$PATH
+export GOROOT=/usr/local/go
+export GOPATH=/usr/local/goPath
+
+最后 source /etc/profile
+即可env查看生效了
+
+
+13. 如何调试优化程序。
+cat /proc/cpuinfo| grep "processor"| wc -l  查看逻辑核数(如果很少，则服务器资源太low了，至少换个2的)
+ps aux|head -1;ps aux|grep -v PID|sort -rn -k +3|head  查看cpu占用高的前十个pid(一个服务要减少其它依赖的cpu消耗)
+通过消除一些第三方pid，和拓展服务器资源，增强程序的稳定性，如果这还不够，这说明，不侵入代码，无法继续优化了，需要侵入代码了。
+通过pprof 查找cpu敏感点: xxxxxxxx.com
+然后去代码里消除这些敏感点。
+
+同理mem也是这个流程
+
+
+14. 如何添加sudo用户
+# root 下
+adduser fengtao  // 新增用户fengtao
+passwd fengtao   // 修改用户密码
+visudo    // 修改sudo用户配置
+type 'i' 进入insert模式，在root ALL=(ALL) ALL 在下面添加一行 fengtao ALL=(ALL) ALL,type :wq 保存退出
+su fengtao   // 切换fengtao用户视角，输入密码
+sudo ls  // 执行成功
+
+
+阿里云账户全名
+
+项目:
+对windows下开发的go程，交叉编译放入linux 服务器上，使用supervisor执行
+ 1.先到工程路径下，执行交叉编译命令:
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o testGo
+	
+  2.传送文件进入公司的文件夹里
+ scp -P 22 testGo root@192.168.226.129:/home/fwhez/goTest
+  3.进入操作台
+	ssh root@192.168.226.129
+  4.cd /home/fwhez/goTest/ 进入指定路径
+  5.ll 查看当前文件，这里会显示你传送的文件BigPlate
+  7.sudo chmod 777 media  修改可执行权限
+  8.ll 查看当前文件 rwxrwxrwx权限全开
+  9.sudo supervisorctl restart testGo 开启你部署的文件！！！！！
+  
+  

@@ -1,0 +1,10 @@
+1.把protoc.exe 放进path
+2.创建example.proto，输入内容，cmd下执行
+protoc --go_out=plugins=grpc:. example.proto
+生成了example.pb.proto
+
+
+-- 生成go-micro的
+protoc --go_out=plugins=micro:. hello_world.proto
+-- 生成在model文件夹下的,需预先创建model文件夹
+protoc --go_out=plugins=micro:.\model hello_world.proto

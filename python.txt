@@ -1,0 +1,629 @@
+[图片]https://www.djangoproject.com/
+[图片]http://www.django-rest-framework.org/
+
+1.单行注释#,多行注释'''content'''.
+  单行语句过长使用\ 来换行
+
+2.linux下如何制定编译器
+#!/user/bin/env python3
+代码前加这段注释即可
+
+3.pycharm无法ctrl c/v ，backspace无法段落删除，tools-vim emulator 勾选去掉
+  缩进时，4个空格手敲，防止Tab跨系统缩进差异
+  PyCharm 默认tab=4space,可以用tab
+
+4.强制类型转换int("5")
+
+5.字符串相加会开辟新内存，影响性能，可以选择%s 来相连
+
+6.cpython,jpython,ironpython,rubypython,jspypthon
+
+7.获取键盘输入 name=input("insert your name")
+
+
+1-50 页码
+8.常量通常用全部大写的变量名表示常量,但事实上PI仍然是一个变量，Python根本没有任何机制保证PI不会被改变
+取地板 10 //3 =3
+asc转换
+ord('A')  65
+chr(65) = 'A'
+
+字符串编码转换互相转换
+>>> '中文'.encode('utf-8')
+b'\xe4\xb8\xad\xe6\x96\x87'
+
+b'\xe4\xb8\xad\xe6\x96\x87'.decode('utf-8')
+'中文'
+可见，1个中文字符经过UTF-8编码后通常会占用3个字节，而1个英文字符只占用1个字节。为了避免乱码问题，应当始终坚持使用UTF-8编码对str和bytes进行转换
+确保文本编辑器正在使用UTF-8 without BOM
+
+9.字符串替换
+ print("this is %s,%s" % ("test case", "test case2"))
+ 
+51-200
+ 10. list 
+ >>> classmates = ['Michael', 'Bob', 'Tracy']
+ >>> classmates
+['Michael', 'Bob', 'Tracy']
+使用负号反向获取，直接获取最后的元素classmates[-1]
+classmates.append("aj")
+classmates.insert(1,"in"),插入位置是m和b之间
+classmates.pop()删除末尾
+classmates.pop(i)
+classmates.sort()
+
+>>> p = ['asp', 'php']
+>>> s = ['python', 'java', p, 'scheme']
+要拿到'php'可以写p[1]或者s[2][1]
+
+11. tuple 有序列表,不可修改，和list的区别还有，用()代替[],能用tuple就不用list，更安全
+只有1个元素的tuple定义时必须加一个逗号,，来消除歧义：
+>>> t = (1,)
+>>> t
+(1,)
+如何让tuple可变，内部存list，该list可变
+
+12.if-else
+age = 3
+if age >= 18:
+print('your age is', age)
+print('adult')
+else:
+print('your age is', age)
+print('teenager')
+
+还有条件就是elif,还可以简写成
+if x:
+print('True')
+#x非0，空list,空字符串，即true 
+
+13.循环
+for name in names:
+print(name)
+
+14.dict
+>>> d = {'Michael': 95, 'Bob': 75, 'Tracy': 85}
+>>> d['Michael']
+95
+判断字典是否存在某值
+>>> 'Thomas' in d
+False
+d.pop('Michael') 删除某键
+1. 查找和插入的速度极快，不会随着key的增加而增加；
+2. 需要占用大量的内存，内存浪费多。
+3. 不可用list做key,这是因为dict根据key来计算value的存储位置，如果每次计算相同的key得出的结果不同，那dict内部就完全混乱了。这个通过key计算位置的算法称为哈希算法（Hash）。
+要保证hash的正确性，作为key的对象就不能变。在Python中，字符串、整数等都是不可变的，因此，可以放心地作为key。而list是可变的，就不能作为key：
+
+15.set
+set可以看成数学意义上的无序和无重复元素的集合，因此，两个set可以做数学意义上的交集、并集等操作：
+>>> s1 = set([1, 2, 3])
+>>> s2 = set([2, 3, 4])
+>>> s1 & s2
+{2, 3}
+>>> s1 | s2
+{1, 2, 3, 4}
+set的输入是一个list
+
+对于不变对象来说，调用对象自身的任意方法，也不会改变该对象自身的内容。相反，这些方法会创建新的对象并返回，这样，就保证了不可变对象本身永远是不可变的
+
+强制类型转换
+>>> int('123')
+123
+>>> int(12.34)
+12
+>>> float('12.34')
+12.34
+>>> str(1.23)
+'1.23'
+>>> str(100)
+'100'
+>>> bool(1)
+True
+>>> bool('')
+False
+
+16.函数别名
+>>> a = abs # 变量a指向abs函数
+>>> a(-1) # 所以也可以通过a调用abs函数
+   函数定义
+   def my_abs(x):
+	if x >= 0:
+	return x
+	else:
+	return -x
+	如果没有return语句，函数执行完毕后也会返回结果，只是结果为None。
+	return None可以简写为return。
+空语句:  pass
+
+17. 引入和多返回值
+import math
+def move(x, y, step, angle=0):
+nx = x + step * math.cos(angle)
+ny = y - step * math.sin(angle)
+return nx, ny
+
+但其实这只是一种假象，Python函数返回的仍然是单一值：
+>>> r = move(100, 100, 60, math.pi / 6)
+>>> print(r)
+(151.96152422706632, 70.0)
+原来返回值是一个tuple！在语法上，返回一个tuple可以省略括号，而多个变量可以同时接收一个tuple，按位置赋给对应的值，所以，Python的函数返回多值其实就是返回一个tuple，但写起来更方便。
+
+参数的默认值
+def power(x, n=2):
+可以使用power(5)表示25
+
+默认值的坑
+def add_end(L=None):
+if L is None:
+L = []
+L.append('END')
+return L
+现在，无论调用多少次，都不会有问题：
+>>> add_end()
+['END']
+>>> add_end()
+['END']
+为什么要设计str、None这样的不变对象呢？因为不变对象一旦创建，对象内部的数据就不能修改，这样就减少了由于修改数据导致的错误。
+
+变参的使用
+前面加一个*号，把list或tuple的元素变成可变参数传进去：
+>>> nums = [1, 2, 3]
+>>> calc(*nums)
+14
+
+关键参数的使用
+def person(name, age, **kw):
+print('name:', name, 'age:', age, 'other:', kw)
+函数person除了必选参数name和age外，还接受关键字参数kw。在调用该函数时，可以只传入必选参数：
+>>> person('Michael', 30)
+name: Michael age: 30 other: {}
+也可以传入任意个数的关键字参数：
+>>> person('Bob', 35, city='Beijing')
+name: Bob age: 35 other: {'city': 'Beijing'}
+>>> person('Adam', 45, gender='M', job='Engineer')
+name: Adam age: 45 other: {'gender': 'M', 'job': 'Engineer'}
+关键字参数有什么用？它可以扩展函数的功能。比如，在person函数
+里，我们保证能接收到name和age这两个参数，但是，如果调用者愿意提供更多的参数，我们也能收到。试想你正在做一个用户注册的功能，
+除了用户名和年龄是必填项外，其他都是可选项，利用关键字参数来定义这个函数就能满足注册的需求。
+仍以person()函数为例，我们希望检查是否有city和job参数：
+def person(name, age, **kw):
+if 'city' in kw:
+# 有city参数
+pass
+if 'job' in kw:
+# 有job参数
+pass
+print('name:', name, 'age:', age, 'other:', kw)
+
+命名关键参数
+def person(name, age, *, city, job):
+print(name, age, city, job)
+调用:
+person('Jack', 24, city='Beijing', job='Engineer')
+
+>>> args = (1, 2, 3, 4)
+>>> kw = {'d': 99, 'x': '#'}
+>>> f1(*args, **kw)
+所以，对于任意函数，都可以通过类似func(*args, **kw)的形式调用它，无论它的参数是如何定义的。
+
+18. 切片
+L[0:9]
+后10个数：
+L[-10:]
+前十个
+L[:10]
+所有数，每5个取一个：
+>>> L[::5]
+tuple切片
+(0, 1, 2, 3, 4, 5)[:3]
+字符串切片
+"abc"[:2]
+
+Python内置的enumerate函数可以把一个list变成索引-元素对，这样就可以在for循环中同时迭代索引和元素本身：
+>>> for i, value in enumerate(['A', 'B', 'C']):
+... print(i, value)
+...
+0 A
+1 B
+2 C
+
+还可以使用两层循环，可以生成全排列：
+>>> [m + n for m in 'ABC' for n in 'XYZ']
+['AX', 'AY', 'AZ', 'BX', 'BY', 'BZ', 'CX', 'CY', 'CZ']
+
+generator 和固定list和tuple相比，有一定推演效果，不会预先生成内存数据
+>>> g = (x * x for x in range(10))
+>>> for n in g:
+... print(n)
+
+19.高阶函数，以函数为入参的函数
+def add(x, y, f):
+return f(x) + f(y)
+
+#reduce 是把入参list 两两加1+3 ,然后4+5,然后9+7 ……
+reduce(add, [1, 3, 5, 7, 9])
+25
+
+#map 的作用是对list的每一个元素，执行f后返回新list
+r = map(f, [1, 2, 3, 4, 5, 6, 7, 8, 9])
+list(r)
+[1, 4, 9, 16, 25, 36, 49, 64, 81]
+#sorted 排序
+sorted(['bob', 'about', 'Zoo', 'Credit'])
+# 忽略大小写
+sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower)
+
+# 闭包
+def lazy_sum(*args):
+def sum():
+ax = 0
+for n in args:
+ax = ax + n
+return ax
+return sum
+
+#函数对象的内置api
+函数对象有一个__name__属性，可以拿到函数的名字：
+>>> now.__name__
+'now'
+
+26._a_ 特殊变量，_a 内部变量非公开,但是依旧可以用，因为
+Python并没有一种方法可以完全限制访问private函数或变量，但是，从编程习惯上不应该引用private函数或变量
+Python解释器对外把__name变量改成了_Student__name，所以，仍然可以通过_Student__name来访问__name变量
+
+27. pip包管理
+pip install Pillow
+
+28.面向对象设计
+class Student(object):
+def __init__(self, name, score):
+self.name = name
+self.score = score
+def print_score(self):
+print('%s: %s' % (self.name, self.score))
+
+29.类继承
+class Animal(object):
+def run(self):
+print('Animal is running...')
+class Dog(Animal)
+    pass
+
+#判断是否是实例
+isinstance(b, Animal)
+#鸭子类型
+对于Python这样的动态语言来说，则不一定需要传入Animal类型。我们只需要保证传入的对象有一个run()方法就可以了,这种类似继承的鸭子类型
+#type()
+type(123)
+<class 'int'>
+type('str')
+<class 'str'>
+type(None)
+#反射
+>>> hasattr(obj, 'x') # 有属性'x'吗？
+True
+>>> obj.x
+9
+>>> hasattr(obj, 'y') # 有属性'y'吗？
+False
+>>> setattr(obj, 'y', 19) # 设置一个属性'y'
+>>> hasattr(obj, 'y') # 有属性'y'吗？
+True
+>>> getattr(obj, 'y') # 获取属性'y'
+19
+>>> obj.y # 获取属性'y'
+
+##装饰器模式
+class Student(object):
+@property
+def score(self):
+return self._score
+@score.setter
+def score(self, value):
+if not isinstance(value, int):
+raise ValueError('score must be an integer!')
+if value < 0 or value > 100:
+raise ValueError('score must between 0 ~ 100!')
+self._score = value
+
+#多重继承
+class Bat(Mammal, Flyable):
+pass
+
+200-300(312)
+#枚举的三种方式
+JAN = 1
+FEB = 2
+MAR = 3
+...
+NOV = 11
+DEC = 12
+
+或者
+
+from enum import Enum
+Month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+
+再或者
+
+@unique
+class Weekday(Enum):
+Sun = 0 # Sun的value被设定为0
+Mon = 1
+Tue = 2
+Wed = 3
+Thu = 4
+Fri = 5
+Sat = 6
+
+
+#异常处理
+try:
+  foo('0')
+except ValueError as e:
+  print('ValueError!')
+  raise
+
+#断言
+n = int(s)
+assert n != 0, 'n is zero!'
+return 10 / n
+
+n!=0应该为true，否则抛出断言错误，信息是n为zero
+
+#io
+with open('/path/to/file', 'r') as f:
+print(f.read())
+这和前面的try ... finally是一样的，但是代码更佳简洁，并且不必调用f.close()方法。  
+
+#io 坑
+只读 r,读二进制rb,写是w和wb
+要读取非UTF-8编码的文本文件，需要给open()函数传入encoding参数，例如，读取GBK编码的文件：
+>>> f = open('/Users/michael/gbk.txt', 'r', encoding='gbk')
+>>> f.read()
+
+##内存读写
+##byte
+>>> from io import BytesIO
+>>> f = BytesIO()
+>>> f.write('中文'.encode('utf-8'))
+6
+>>> print(f.getvalue())
+b'\xe4\xb8\xad\xe6\x96\x87'
+##string
+>>> from io import StringIO
+>>> f = StringIO()
+>>> f.write('hello')
+5
+>>> f.write(' ')
+1
+>>> f.write('world!')
+6
+>>> print(f.getvalue())
+hello world!
+
+调用read()会一次性读取文件的全部内容，如果文件有10G，内存就爆了，所以，要保险起见，可以反复调用read(size)方法，每次最多读取size个字节的内容。
+另外，调用readline()可以每次读取一行内容，调用readlines()一次读取所有内容并按行返回list。因此，要根据需要决定怎么调用。
+
+#序列化 import pickle
+>>> f = open('dump.txt', 'wb')
+>>> pickle.dump(d, f)
+#反序列化
+>>> f = open('dump.txt', 'rb')
+>>> d = pickle.load(f)
+>>> f.close()
+>>> d
+{'age': 20, 'score': 88, 'name': 'Bob'}
+
+#Json 序列化
+>>> import json
+>>> d = dict(name='Bob', age=20, score=88)
+>>> json.dumps(d)
+'{"age": 20, "score": 88, "name": "Bob"}'
+
+#JSON反序列化
+>>> json_str = '{"age": 20, "score": 88, "name": "Bob"}'
+>>> json.loads(json_str)
+{'age': 20, 'score': 88, 'name': 'Bob'}
+
+###坑
+无法直接将对象json化，需要写设置，如:
+print(json.dumps(s, default=lambda obj: obj.__dict__))
+反序列化也有坑,要这样写
+def dict2student(d):
+return Student(d['name'], d['age'], d['score'])
+json_str = '{"age": 20, "score": 88, "name": "Bob"}'
+print(json.loads(json_str, object_hook=dict2student))
+
+30.开进程
+import os
+print('Process (%s) start...' % os.getpid())
+# Only works on Unix/Linux/Mac:
+pid = os.fork()
+if pid == 0:
+print('I am child process (%s) and my parent is %s.' % (os.getpid(), os.getppid()))
+else:
+print('I (%s) just created a child process (%s).' % (os.getpid(), pid))
+
+运行结果如下：
+Process (876) start...
+I (876) just created a child process (877).
+I am child process (877) and my parent is 876.
+
+##线程和加锁
+balance = 0
+lock = threading.Lock()
+def run_thread(n):
+for i in range(100000):
+# 先要获取锁:
+lock.acquire()
+try:
+# 放心地改吧:
+change_it(n)
+finally:
+# 改完了一定要释放锁:
+lock.release()
+
+31.正则表达式
+在正则表达式中，如果直接给出字符，就是精确匹配。用\d可以匹配一个数字，\w可以匹配一个字母或数字，所以：
+? '00\d'可以匹配'007'，但无法匹配'00A'；
+? '\d\d\d'可以匹配'010'；
+? '\w\w\d'可以匹配'py3'；
+.可以匹配任意字符，所以：
+? 'py.'可以匹配'pyc'、'pyo'、'py!'等等。
+要匹配变长的字符，在正则表达式中，用*表示任意个字符（包括0个），用+表示至少一个字符，用?表示0个或1个字符，用{n}表示n个字符，用{n,m}表示n-m个字符：
+
+因此我们强烈建议使用Python的r前缀，就不用考虑转义的问题了：
+s = r'ABC\-001' # Python的字符串
+# 对应的正则表达式字符串不变：
+# 'ABC\-001'
+
+32.模块
+##时间模块
+>>> from datetime import datetime
+>>> now = datetime.now()
+>>> print(now)
+>>> print(type(now))
+<class 'datetime.datetime'>
+
+## 时间戳和时间转换
+##datetime->timestamp
+>>> from datetime import datetime
+>>> dt = datetime(2015, 4, 19, 12, 20) # 用指定日期时间创建datetime
+>>> dt.timestamp() # 把timestamp转换为datetime
+1429417200.0
+注意Python的timestamp是一个浮点数。如果有小数位，小数位表示毫秒数。
+##timestamp -> datetime
+>>> from datetime import datetime
+>>> t = 1429417200.0
+>>> print(datetime.fromtimestamp(t))
+2015-04-19 12:20:00
+>>> print(datetime.fromtimestamp(t)) # 本地时间
+2015-04-19 12:20:00
+>>> print(datetime.utcfromtimestamp(t)) # UTC时间
+2015-04-19 04:20:00
+##string->datetime
+>>> from datetime import datetime
+Python3 基础教程【完整版】 http://www.yeayee.com/
+307/531
+>>> cday = datetime.strptime('2015-6-1 18:19:59', '%Y-%m-%d %H:%M:%S')
+>>> print(cday)
+2015-06-01 18:19:59
+##datetime->timestamp
+>>> from datetime import datetime
+>>> now = datetime.now()
+>>> print(now.strftime('%a, %b %d %H:%M'))
+Mon, May 05 16:28
+##datetime加减
+>>> from datetime import datetime, timedelta
+>>> now = datetime.now()
+>>> now
+datetime.datetime(2015, 5, 18, 16, 57, 3, 540997)
+>>> now + timedelta(hours=10)
+datetime.datetime(2015, 5, 19, 2, 57, 3, 540997)
+>>> now - timedelta(days=1)
+datetime.datetime(2015, 5, 17, 16, 57, 3, 540997)
+>>> now + timedelta(days=2, hours=12)
+datetime.datetime(2015, 5, 21, 4, 57, 3, 540997)
+
+#namedtuple
+>>> from collections import namedtuple
+>>> Point = namedtuple('Point', ['x', 'y'])
+>>> p = Point(1, 2)
+>>> p.x
+1
+>>> p.y
+2
+>>> isinstance(p, Point)
+True
+>>> isinstance(p, tuple)
+True
+
+#deque 高效插入删除
+312/531
+>>> from collections import deque
+>>> q = deque(['a', 'b', 'c'])
+>>> q.append('x')
+>>> q.appendleft('y')
+>>> q
+deque(['y', 'a', 'b', 'c', 'x'])
+
+#defaultDict 具备默认值的字典,而不抛错
+>>> from collections import defaultdict
+>>> dd = defaultdict(lambda: 'N/A')
+>>> dd['key1'] = 'abc'
+>>> dd['key1'] # key1存在
+'abc'
+>>> dd['key2'] # key2不存在，返回默认值
+'N/A'
+
+300-400
+#Counter 统计元素出现的个数
+Counter是一个简单的计数器，例如，统计字符出现的个数：
+>>> from collections import Counter
+>>> c = Counter()
+>>> for ch in 'programming':
+... c[ch] = c[ch] + 1
+...
+>>> c
+Counter({'g': 2, 'm': 2, 'r': 2, 'a': 1, 'i': 1, 'o': 1, 'n': 1, 'p': 1})
+
+#编码
+##Base64
+>>> import base64
+>>> base64.b64encode(b'binary\x00string')
+b'YmluYXJ5AHN0cmluZw=='
+>>> base64.b64decode(b'YmluYXJ5AHN0cmluZw==')
+b'binary\x00string'
+
+#加密
+##md5
+import hashlib
+md5 = hashlib.md5()
+md5.update('how to use md5 in python hashlib?'.encode('utf-8'))
+print(md5.hexdigest())
+
+如果数据量很大，可以分块多次调用update()，最后计算的结果是一样的：
+import hashlib
+md5 = hashlib.md5()
+md5.update('how to use md5 in '.encode('utf-8'))
+md5.update('python hashlib?'.encode('utf-8'))
+print(md5.hexdigest())
+>>d26a53750bc40b38b65a520292f69306
+
+##sha1
+import hashlib
+sha1 = hashlib.sha1()
+sha1.update('how to use sha1 in '.encode('utf-8'))
+sha1.update('python hashlib?'.encode('utf-8'))
+print(sha1.hexdigest())
+
+33.数据库
+#sqlite3
+https://github.com/michaelliao/learn-python3/tree/master/samples/db
+#mysql
+pip install mysql-connector-python --allow-external mysql-connector-python
+https://github.com/michaelliao/learn-python3/blob/master/samples/db/do_mysql.py
+
+#http 详解
+HTTP协议是一种文本协议，所以，它的格式也非常简单。HTTP GET请求的格式：
+GET /path HTTP/1.1
+Header1: Value1
+Header2: Value2
+Header3: Value3
+每个Header一行一个，换行符是\r\n。
+HTTP POST请求的格式：
+POST /path HTTP/1.1
+Header1: Value1
+Header2: Value2
+Header3: Value3
+body data goes here...
+当遇到连续两个\r\n时，Header部分结束，后面的数据全部是Body。
+HTTP响应的格式：
+200 OK
+Header1: Value1
+Header2: Value2
+Header3: Value3
+body data goes here...
+HTTP响应如果包含body，也是通过\r\n\r\n来分隔的。请再次注意，Body的数据类型由Content-Type头来确定，如果是网页，Body就是文本，如果是图片，Body就是图片的二进制数据。
+当存在Content-Encoding时，Body数据是被压缩的，最常见的压缩方式是gzip，所以，看到Content-Encoding: gzip时，需要将Body数据先解压缩，才能得到真正的数据。压缩的目的在于减少Body的大小，加快网络传输。

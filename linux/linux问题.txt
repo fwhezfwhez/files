@@ -1,0 +1,245 @@
+1.若有一个文件的类型和权限数据为 -rwxr-xr--,请说明其意义。
+第一个-表示是一个文件类型，如果是d则表示是一个目录
+后面每3个为一组，分别表示，文件所有者，所属用户组，其他用户，对该文件的访问权限
+r 可读，w可写，x可执行，-无响应权限
+用有r权限仅代表可读，能不能进入本目录，得看有没有x权限
+
+
+2.如何.bashrc的文件权限改为"-rw-r--r--"?
+权限数字
+rwx 对应4,2,1，权限分数是rwx分数累加，"rwxrwxr--"的权限来说可以形容与774为权限数字,分别对应所有者，所属组，其他用户的权限分数,使用chmod修改权限数字
+chmod 644 .bashrc
+
+3.如何先进入/var/spool/mail/目录，再进入/var/spool/cron目录
+cd /var/spool/mail   //绝对路径,从/根出发
+cd ../cron           //相对路径，从上一步出发
+
+4.如何查看linux版本
+uname -a
+
+5.-wget 命令not found
+yum -y install wget
+ -permission deny
+su 
+password:xxxxx
+yum -y install wge
+
+6.如何安装supervisor
+wget --no-check-certificate https://bootstrap.pypa.io/ez_setup.py -O - | sudo python
+easy_install supervisor
+初始化配置文件:
+mkdir /etc/supervisor
+echo_supervisord_conf > /etc/supervisor/supervisord.conf
+配置文件中分号;表示注释
+ mkdir /etc/supervisor/config.d
+ vim /etc/supervisor/supervisord.conf
+ i
+ [include]
+ files = /etc/supervisor/config.d/*.ini
+启动supervisor服务
+supervisord -c /etc/supervisor/supervisord.conf
+supervisorctl 查看管理的客户端
+quit 退出
+配置开机启动supervisor
+cd /lib/systemd/system
+vim supervisor.service
+```
+[Unit]
+Description=supervisor
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+ExecStop=/usr/bin/supervisorctl $OPTIONS shutdown
+ExecReload=/usr/bin/supervisorctl $OPTIONS reload
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
+```
+systemctl enable supervisor.service
+systemctl daemon-reload
+chmod 766 supervisor.service
+vim /etc/rc.d/init.d/supervisor
+```
+#!/bin/bash
+#
+# supervisord   This scripts turns supervisord on
+#
+# Author:       Mike McGrath <mmcgrath@redhat.com> (based off yumupdatesd)
+#
+# chkconfig:    - 95 04
+#
+# description:  supervisor is a process control utility.  It has a web based
+#               xmlrpc interface as well as a few other nifty features.
+# processname:  supervisord
+# config: /etc/supervisor/supervisord.conf
+# pidfile: /var/run/supervisord.pid
+#
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+
+start() {
+    echo -n $"Starting supervisord: "
+    daemon "supervisord -c /etc/supervisor/supervisord.conf "
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/supervisord
+}
+
+stop() {
+    echo -n $"Stopping supervisord: "
+    killproc supervisord
+    echo
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/supervisord
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop) 
+    stop
+    ;;
+  restart|force-reload|reload)
+    restart
+    ;;
+  condrestart)
+    [ -f /var/lock/subsys/supervisord ] && restart
+    ;;
+  status)
+    status supervisord
+    RETVAL=$?
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+    exit 1
+esac
+
+exit $RETVAL
+```
+chmod 755 /etc/rc.d/init.d/supervisor
+chkconfig supervisor on
+
+7.安装nginx
+yum -y install make zlib zlib-devel gcc-c++ libtool  openssl openssl-devel
+wget http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz
+tar zxvf pcre-8.35.tar.gz
+cd pcre-8.35
+./configure
+make && make install
+pcre-config --version
+cd ..
+wget http://nginx.org/download/nginx-1.6.2.tar.gz
+ tar zxvf nginx-1.6.2.tar.gz
+  cd nginx-1.6.2
+  ./configure --prefix=/usr/local/webserver/nginx --with-http_stub_status_module --with-http_ssl_module --with-pcre=/usr/src/pcre-8.35
+  make
+  make install
+  /usr/local/webserver/nginx/sbin/nginx -v
+  /usr/sbin/groupadd www 
+  /usr/sbin/useradd -g www www
+  vim nginx.conf
+  ```
+  user www www;
+worker_processes 2; #设置值和CPU核心数一致
+error_log /usr/local/webserver/nginx/logs/nginx_error.log crit; #日志位置和日志级别
+pid /usr/local/webserver/nginx/nginx.pid;
+#Specifies the value for maximum file descriptors that can be opened by this process.
+worker_rlimit_nofile 65535;
+events
+{
+  use epoll;
+  worker_connections 65535;
+}
+http
+{
+  include mime.types;
+  default_type application/octet-stream;
+  log_format main  '$remote_addr - $remote_user [$time_local] "$request" '
+               '$status $body_bytes_sent "$http_referer" '
+               '"$http_user_agent" $http_x_forwarded_for';
+  
+#charset gb2312;
+     
+  server_names_hash_bucket_size 128;
+  client_header_buffer_size 32k;
+  large_client_header_buffers 4 32k;
+  client_max_body_size 8m;
+     
+  sendfile on;
+  tcp_nopush on;
+  keepalive_timeout 60;
+  tcp_nodelay on;
+  fastcgi_connect_timeout 300;
+  fastcgi_send_timeout 300;
+  fastcgi_read_timeout 300;
+  fastcgi_buffer_size 64k;
+  fastcgi_buffers 4 64k;
+  fastcgi_busy_buffers_size 128k;
+  fastcgi_temp_file_write_size 128k;
+  gzip on; 
+  gzip_min_length 1k;
+  gzip_buffers 4 16k;
+  gzip_http_version 1.0;
+  gzip_comp_level 2;
+  gzip_types text/plain application/x-javascript text/css application/xml;
+  gzip_vary on;
+ 
+  #limit_zone crawler $binary_remote_addr 10m;
+ #下面是server虚拟主机的配置
+ server
+  {
+    listen 80;#监听端口
+    server_name localhost;#域名
+    index index.html index.htm index.php;
+    root /usr/local/webserver/nginx/html;#站点目录
+      location ~ .*\.(php|php5)?$
+    {
+      #fastcgi_pass unix:/tmp/php-cgi.sock;
+      fastcgi_pass 127.0.0.1:9000;
+      fastcgi_index index.php;
+      include fastcgi.conf;
+    }
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|ico)$
+    {
+      expires 30d;
+  # access_log off;
+    }
+    location ~ .*\.(js|css)?$
+    {
+      expires 15d;
+   # access_log off;
+    }
+    access_log off;
+  }
+
+}
+  ```
+  /usr/local/webserver/nginx/sbin/nginx -t
+  
+  将nginx添加环境变量
+  vim etc/profile
+  在末尾Path那添加成:
+  export PATH=$PATH:/usr/local/go/bin:/usr/local/webserver/nginx/sbin
+   wq:
+  source /etc/profile
+  
+  nginx  开启
+  ps -ef|grep nginx 查看信息
+  以下，只能在服务开启的时候执行
+  nginx -s reload 重载配置
+  nginx -s reopen 重启
+  nginx -s stop 停止nginx
+

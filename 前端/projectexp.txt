@@ -1,0 +1,9 @@
+1. 初始化与运行
+vue init webpack imook
+cd imook
+npm run dev
+
+初级版完成 ->localhost:8080
+
+
+2.

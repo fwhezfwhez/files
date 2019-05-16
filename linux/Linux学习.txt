@@ -1,0 +1,19 @@
+章节6
+1. 如何下载输入法:
+打开终端:
+-su root
+-yum install "@Chinese Support"
+安装完成后
+左上角 ，System-Preference-input method feature-Use IBus -input Method Preferences
+         -input method -选择刚下载好的拼音-add
+重启系统
+
+2.如何判断当前用户级别，以及普通用户和root用户如何相互切换
+*打开终端，提示符$为普通用户，输入su回车，输对密码即可进入root用户，root下 su 用户名即可切换回来
+
+3.除了d-分别表示目录和文件外，还有其他文件类型，比如l-连接文件 ，b-块设备文件如硬盘,c-字符设备文件如鼠标键盘等串行端口,s-套接字文件，[p]管道fifo
+
+4.FHS标准的四个特色，是否可分享，是否可变,三层主目录/,/var,/user
+
+章节7
+1.根目录的 .和..都是自己

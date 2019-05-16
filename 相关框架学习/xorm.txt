@@ -1,0 +1,2 @@
+xorm reverse postgres "dbname=test sslmode=disable user=postgres password=123" templates/goxorm
+可以使用该命令生成model

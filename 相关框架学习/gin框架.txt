@@ -1,0 +1,45 @@
+https://github.com/gin-gonic/gin/blob/develop/README.md
+
+
+
+1.gin.Default()返回一个引擎Engine实例router
+  GET和Post
+
+2.服务器端解析客户端的url请求参数的三种方式以及路由注意事项
+*客户端发送"http://localhost:8888/test/id=5/name=Tao"
+ 服务器端接受:id:=context.Param("id")
+             name:=context.Param("name")
+路由         router.POST("/test/:name/*id", func3) //:表示必须匹配到，*表示可选匹配
+*客户端发送  resp,_ = http.Get("http://0.0.0.0:8888/test6?name=BBB&passwd=CCC")
+             resp,_ = http.Post("http://0.0.0.0:8888/test7?name=DDD&passwd=EEE", "",strings.NewReader(""))
+ 服务器端接受:id:=context.Query("id")
+              name:=context.Query("name")
+ 路由         router.POST("/test", func2)
+*客户端发送   resp,_ = http.Post("http://0.0.0.0:8888/test", "application/x-www- form-urlencoded",strings.NewReader("message=8888888&extra=999999"))
+ 服务器接收   message := c.PostForm("message")
+              extra := c.PostForm("extra")
+ 路由         router.POST("/test", func3)
+
+
+3.传送文件
+4.binding
+5.router group
+6.静态文件
+7.加载模板
+8.重定向
+
+gin.H
+
+
+9.c.Param和c.Query只用于get请求在url后面的参数可识别
+  c.Bind 可识别Post内容，form和json都可识别
+
+  c.JSON{200,value}
+  value可以是gin.H{"mession":"kill lion"}
+  也可以直接是一个map[string]interface{}
+  也可以直接是一个struct
+  
+  
+ 10.router.GET("/user/:userid/:username",getParam)  
+    url:http://localhost:8088/user/1/tyming 
+	拿值: c.Param("userId")

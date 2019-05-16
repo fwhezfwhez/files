@@ -1,0 +1,124 @@
+1. 安装vscode，安装node，重启后，cmd node --version 输出版本信息表示安装成功,使用vscode创建文件:
+server.js
+var http = require('http');
+
+http.createServer(function (request, response) {
+
+    // 发送 HTTP 头部 
+    // HTTP 状态值: 200 : OK
+    // 内容类型: text/plain
+    response.writeHead(200, {'Content-Type': 'text/plain'});
+
+    // 发送响应数据 "Hello World"
+    response.end('Hello World\n');
+}).listen(8888);
+
+// 终端打印如下信息
+console.log('Server running at http://127.0.0.1:8888/');
+
+cmd cd 到指定该文件路径上执行 node server.js，打开浏览器输入http://127.0.0.1:8888/,即开启了一个服务
+
+2.NPM 是类共享服务站，允许用户通过它上传和下载代码 cmd 执行 npm -v 查看版本,npm install express 安装常用的express模块,安装好后，代码中var express = require('express');引用它.
+npm install express          # 本地安装
+npm install express -g   # 全局安装
+打开node终端进行简单的操作:
+cmd-node-1+4>5
+创建main.js 执行node main.js
+内容:
+var fs = require("fs");
+var data = fs.readFileSync("input.txt");
+console.log(data.toString());
+console.log("程序结束");
+
+**坑1**解决文本中文乱码的问题,input.txt的格式选择utf-8 无bom解决.notepad++-格式-uft8无bom
+
+3.简单的注册事件和触发时间和事件处理,关键字 event,emit,handler
+// 引入 events 模块
+var events = require('events');
+// 创建 eventEmitter 对象
+var eventEmitter = new events.EventEmitter();
+
+// 创建事件处理程序
+var connectHandler = function connected() {
+   console.log('连接成功。');
+  
+   // 触发 data_received 事件 
+   eventEmitter.emit('data_received');
+}
+
+// 绑定 connection 事件处理程序
+eventEmitter.on('connection', connectHandler);
+ 
+// 使用匿名函数绑定 data_received 事件
+eventEmitter.on('data_received', function(){
+   console.log('数据接收成功。');
+});
+
+// 触发 connection 事件 
+eventEmitter.emit('connection');
+
+console.log("程序执行完毕。");
+
+4.设置时延
+setTimeout(function() { 
+    event.emit('some_event'); 
+}, 1000); 
+
+5.触发带参时间
+var events = require('events'); 
+var emitter = new events.EventEmitter(); 
+emitter.on('someEvent', function(arg1, arg2) { 
+    console.log('listener1', arg1, arg2); 
+}); 
+emitter.on('someEvent', function(arg1, arg2) { 
+    console.log('listener2', arg1, arg2); 
+}); 
+emitter.emit('someEvent', 'arg1 参数', 'arg2 参数'); 
+
+6.模块的导出和使用
+hello.js
+function Hello() { 
+  console.log("nihao")
+}; 
+module.exports = Hello;
+
+export.js
+var Hello = require('./hello'); 
+Hello()
+
+node export.js
+
+7.函数传递
+function say(word) {
+  console.log(word);
+}
+
+function execute(someFunction, value) {
+  someFunction(value);
+}
+
+execute(say, "Hello");
+
+8.一些全局函数和变量
+__dirname
+__dirname 表示当前执行脚本所在的目录。
+
+setTimeout(cb, ms)
+setTimeout(cb, ms) 全局函数在指定的毫秒(ms)数后执行指定函数(cb)。：setTimeout() 只执行一次指定函数。
+返回一个代表定时器的句柄值。
+
+clearTimeout(t)
+clearTimeout( t ) 全局函数用于停止一个之前通过 setTimeout() 创建的定时器。 参数 t 是通过 setTimeout() 函数创建的定时器。
+function printHello(){
+   console.log( "Hello, World!");
+}
+// 两秒后执行以上函数
+var t = setTimeout(printHello, 2000);
+// 清除定时器
+clearTimeout(t)
+
+setInterval(cb, ms)
+setInterval(cb, ms) 全局函数在指定的毫秒(ms)数后执行指定函数(cb)。
+返回一个代表定时器的句柄值。可以使用 clearInterval(t) 函数来清除定时器。
+setInterval() 方法会不停地调用函数，直到 clearInterval() 被调用或窗口被关闭。
+

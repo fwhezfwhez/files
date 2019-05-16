@@ -1,0 +1,68 @@
+1.创建一个新的工程并且上传
+git init
+git add README.md   
+git commit -m "first commit"
+git remote add origin https://github.com/fwhezfwhez/elastic-go-tool.git
+git push -u origin master
+
+2.已经有一个工程仓库后更新
+git add .
+get commit -m "update"
+git push -u origin master
+
+3
+git clone xxxx
+
+4.显示git配置
+git config --list
+
+5.clone下来的仓库名修改
+git clone https://github.com/libgit2/libgit2 mylibgit
+
+6.git status
+查看工程下有哪些未被追踪或修改
+commited是暂存状态，
+
+7.git commit -a -m ''等价于git add . 和git commit -m ''
+
+8.只有最后一句生效
+git commit -m 'initial commit'
+git add forgotten_file
+git commit --amend
+
+9.git tag 打标签
+
+10.git branch testing
+   git checkout testing
+   git add .
+   git commit -m 'testing branch update'
+   git checkout master
+   git merge testing
+   gig checkout -d testing
+   
+   
+11. 删除远程的分支
+git push origin --delete [分支名]
+
+12. 版本回退
+git reset --hard 0a19d20f3e12edefab3d
+
+13. 把所有commit过的记录统一成一条
+- 复制最后版本的项目到另一个路径，删除.git文件夹
+- git reset --hard 首条记录md5   本地仓库回滚到首条记录
+- git push -f orgin HEAD:master  强制提交到首条记录，即远程仓库回滚
+- git branch res 
+- git checkout res
+- 删除除.git下所有文件，复制之前的最后版本项目到该路径下
+- res 合并到 master (pull request也行)
+
+14. 添加两个远程仓库
+git remote add  origin https://github.com/x/x
+git remote add  origin2 https://github.com/x/x
+
+14. 对download zip方式下载github 源码 ，进行git关联远程仓库
+git init
+git add .
+git remote add origin https://github.com/xx/x
+git remote  update
+git checkout master

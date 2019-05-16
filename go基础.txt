@@ -1,0 +1,739 @@
+1.只有main包包含main函数，并且只有一个;
+  const定义常量;
+  var进行全局变量声明和赋值;
+  type声明结构体和接口
+  func声明函数
+  
+  别名的使用:import std "fmt"，则可以直接用std操作
+  可见性规则，首字母大写则为public，小写为private
+  常-全-类-体-接
+
+2.引用类型: slice map chan
+  用于保存指针的 uintptr
+  特殊值类型 array,struct,string
+  函数类型:func
+  复数类型:complex64
+
+  值类型默认值0，bool默认false,string默认"",对a[]int 如果没赋予长度，则是切面，默认[],赋予了长度a [1]int,则[0]默认
+  判断一个类型的区间限，math包里,math.MaxIn32 …… 
+
+3.忽略符_ a,_,c,d:=1,2,3,4,一般用在函数返回值取一部分.
+  强制转换A=int(B)
+  b:=string(a),如果a是数字，则b为以a数字为asc码的字符 
+  自定义类型和原类型之间也要显式转换,但byte与uint8和rune与int32不用显转
+
+4.将数字转换成字符串strconv.Itoa(a);反向是strconv.Atoi(b)
+  常量表达式必须是内置函数以及常量，不能是运行时变量
+  枚举iota
+  iota初始0，每遇到一个组员自增1，遇到const清零
+  const(
+	a="A"
+	b	
+	c=iota
+        d )
+  c为2，d为3
+  星期枚举:
+  const(
+ 	 Monday=iota
+ 	 Tuesday
+  	 Wednesday
+  	 Thursday
+ 	 Friday
+  	 Saturday
+  	 Sunday
+  )
+  &^ 在第一个操作数为1的时候和第二个操作数取异或,1&^0 =1,0&^任何 =0,1&^1= 0
+  
+5.a++不能用作表达式，且++必须在a后面
+  if 的条件没有括号
+  if可接初始化表达式: if a:=1;a>3{},此时a是局部变量
+  for{}无限循环
+  switch a{
+   case 0:
+   case 1	
+  }
+  不需要加break,自动结束，如果要继续检查，则添加fallthrough
+  类似if 也支持一个初始化表达式
+  switch a:=2;{
+  }也是可以的.
+    a := 4
+    switch a {
+    case 4: ST.Println(a)
+    fallthrough
+    default:ST.Println(a-1)
+   }
+   也可以这样写:
+    a:=4
+    switch {
+    case a==4: ST.Println(a)
+    fallthrough
+    default:ST.Println(a-1)
+    }
+   break，continue分别表示跳出当前循环和当前循环层，配合标签使用可以有goto的效果但是
+  二者有区别，配合标签是跳出和标签同层循环，goto的话是调整语句执行位置，如果把标签放到
+  循环之前，goto依旧会再次进入循环
+  continue Lable跳入的位置，该循环的系数初始值不重置，内层重置
+
+6.长度和类型，共同组成数组类型
+  [2]int和[3]int是两种类型，不可以直接转换,数组的比较必须是建立在同类型
+  var a [2]int
+  a:=[2]int{2,2}
+  a:=[20]int{19:1,9:3}//第20个元素赋值为1，第10个元素是3
+  a:=[...]int{2,2}//自动计算长度
+  数组在go里是值类型
+  p:=new([10]int)得到的是一个数组的指针
+
+7.切片是引用类型: var s []int
+  len(),cap(),make(),append(),copy()
+  a:=[10]int{0,1,2,3,……9}
+  *采用截取的方式生成切片:s:=a[5:10]//相当于数组a[5]-a[9],但是不包括a[9]
+  *正式 s:=make([]int,3,10),指定类型和初始长度和容量(底层) 在长度超标以前，容量足够不需
+   要重新分配，一旦超越到第11个，就会每次增加一倍，由10变成20
+   %p十六进制占位符
+   %v 自格式
+  copy(s1,s2)
+  append(s1,……)
+
+8.map
+  声明:var m map[int]string
+  初始化:m=map[int]string 
+     或者:m=make(map[int]string)
+
+   m[1]="OK"//map[1:OK]
+   delete(m,1)
+   
+   如果是map[int]map[int]string 类型，必须每个内map都要初始化
+
+    var m map[int]string = make(map[int]string)
+    m[1]="good"
+    value,ok:=m[1]//表示GOOD值和true存在这个对象
+
+   创建一个以map为底的slice sm:=make([]map[int]string)
+   迭代:
+   sm:=make([]map[int]string,5)
+   for i,v:=range sm{
+	v = make(map[int]string)
+	v[i]="OK"+strconv.Itoa(i)
+	fmt.Println(v)
+   }
+   v[i]和sm[i]的区别在于，前者仅在for内部复制sm[i]，修改不会作用于底层sm，而后者会
+   对slice值排序:sort.Ints(slice)
+
+9.函数不支持嵌套，是一种类型
+func fun(a,b,c int)(int,string){
+}传入3个int参数，返回两个返回值
+
+func fun()(a,b,c int){
+ a,b,c=1,2,3
+ return a,b,C
+}
+
+ 不定长变参:
+ func fun(b string,a ...int){
+}
+ 必须放尾参数上，会内置把a变成切片,但是传值的时候仅仅是值传递
+ 匿名函数a:=func(){}
+
+ defer，类似析构函数,逆序调用
+ defer fmt.Println("b")
+ defer fmt.Println("c")
+ 输出c b
+ 调用匿名函数:
+  defer func(){}()发生在defer所在函数体return之后
+
+9.1异常处理
+ panic和recover处理错误，panic可以随地引发，但是recover只能在defer调用函数有效
+ func main(){
+  A()
+  B()
+  C() 
+}
+func A(){
+}
+func B(){
+/*
+ defer func(){
+    if err:=recover();err!=nil{
+      fmt.Println("recover")
+    }
+  }()
+*/
+panic("throw a panic")
+}
+func C(){}
+则main里，只会执行A函数，并且输出throw a panic,不执行C,如何解开defer，则会执行c，并且中间
+输出recover，不执行throw
+
+10.
+ type person struct{
+   name string
+   id int
+ } 
+ a:=person{}
+ a.name="ft"
+ a.id=1
+ *结构体是值类型，传参的时候是值传递，不会影响结果
+ 所以可以在赋值的时候直接把a弄成引用
+ a:=&person{
+  Name:"",
+  Age:22,
+ }
+ 结构体内冒号和逗号都不能省略
+ 取属性的时候，a.Name和(*a).Name都行
+ 匿名结构"
+ a:=&struct{
+   Name string
+   Age int
+ }{
+   Name:"",
+   Age:22,
+ }
+ 用组合嵌入来代替继承
+type human struct{
+ Sex int
+ Name string
+ Age int
+}
+type student struct{
+ human
+ class string
+}
+type student struct{
+ human
+ apartment string
+}
+调用方法
+a:= teacher{apartment:"ge",human:human(Sex:1)}
+a.Sex=2//a.human.Sex=2也行
+
+11.Receiver是函数默认强制要求的第一个参数,表述函数绑定的结构类型
+ 比方说函数
+ func (a A) Print(){
+  fmt.Println("A")
+ }
+ 则肯定有一个A结构体:
+ type A struct{}
+ 则这个方法的接收者就是A，调用时:
+  a:=A{}
+  a.Print()
+
+ 这种绑定的形式替代了重载，可以同时有
+ func (b B) Print（）{}
+
+ func (a A) Print(b int)和func (a A) Print()也是不允许的
+
+ type TZ int
+ func (a *TZ) Print(){}
+ 则可以辆这样调用:var tz TZ
+                  tz.Print()或者(*TZ).Print(&tz)
+ 被绑定的方法可以访问绑定块的私有成员
+
+ 12.golang中的类型判断
+ var a interface{}
+ newA,ok:=a.(string)
+
+ go里的接口和他的实现块不需要显示说明实现了哪个接口
+ 只要该块有相应的方法和他绑定，并且该方法是接口里的，
+ 比如 var a USB
+      a=PhoneConnector{}
+      a.Connect()
+ 其中USB是接口，内部有Connect方法声明，PhoneConnector是结构体，有func (pc PhoneConnector) Connect(){}和他绑定
+
+ ok Pattern:
+ if v,ok:=usb.(PhoneConnector);ok{
+    fmt.Println(v.name)
+    return
+ }
+ fmt.Prinln("unknown device")
+
+ switch Pattern:
+ switch v:= usb.(type){
+    case PhoneConnector:fmt.Println(v.name)
+    default: fmt.Println("unknown device") 
+ }
+
+13.TypeOf和ValueOf 从接口中获取对象信息，可以反射方式动态调用方法
+   reflect.TypeOf(o)返回一个Type对象t，Type接口有 各种反射回来的信息
+   对一个字段Desc string,比如创建值是"tom",则"Desc"存放在Type对象的Name里,string存在Type对象的Type里,"Tom"存放在Value对象的Field(i).interface()里
+   t.NumField()返回该对象的字段数量即索引长度 len int
+   t.Field(i),i是0到len的索引，返回一个Value对象,f=t.Field(i)
+
+   v:ValueOf(&x)如果写一个指针,则可以通过v.Elem().setInt(9),来给x赋值9
+
+   动态调用方法:
+   u:=User{1,"OK",12}
+   v:=reflect.ValueOf(u)
+   mv:=v.MethodByName("Hello")//user对象有Hello()方法
+   args:=[]reflect.Value{reflect.ValueOf("Tom")}
+   mv.Calll(args)
+   
+
+14.Goroutine并发
+   通过Channel通信,Channel由make创建,close关闭，是引用类型，
+   var c chan bool
+   c=make(chan bool)
+   Select处理一到多个channel发送与接受
+   有缓存，异步，无缓存，同步
+   c:=make(chan bool)//(chan bool,10)设置缓存10，允许十个并发任务无错误进行
+   go func(){
+      fmt.Println("GO GO GO")
+      c<-true
+   }
+   <-c
+
+  *使用同步包里的任务组来建立同步任务
+  import "sync"
+  ……
+  func main(){
+    wg:=sync.WaitGroup{}
+  }
+
+15.使用切片时候，有可能因为容量问题导致指针变向，所以最好用返回值代替直接传引用修改
+
+16.http.HandleFunc("/login", login)表示localhost:端口/login后进入login函数
+
+17.判断一个interface{}的类型
+if v,ok:=arg.(float64);ok{
+}
+
+switch v:=arg.(type){
+case int:
+case float64:
+}
+
+18.sync
+var wg sync.WaitGroup
+var urls = []string{
+    "http://www.golang.org/",
+    "http://www.google.com/",
+    "http://www.somestupidname.com/",
+}
+for _, url := range urls {
+    // Increment the WaitGroup counter.
+    wg.Add(1)
+    // Launch a goroutine to fetch the URL.
+    go func(url string) {
+        // Decrement the counter when the goroutine completes.
+        defer wg.Done()
+        // Fetch the URL.
+        http.Get(url)
+    }(url)
+}
+// Wait for all HTTP fetches to complete.
+wg.Wait()
+
+19.elem,ok:=<-chanInt 使用这种写法最好，这样就可以通过ok判断是否close
+有时候chanInt被并发close了，elem会被返回默认0值，而有时候业务需求要传递的也是0值，这样就可以通过ok来判定了!
+试图从nil的管道里获取值会造成永久堵塞!
+试图向nil的管道里发送值也会造成永久堵塞!
+永远不要在接收端关闭通道,发送端关闭通道后不影响接收端对已有数据的接收,可以理解为，发送端关闭后，将不在存数据进通道
+
+单向通道不应该被声明，而表示的是操作意图，比如对一个双向管道只进行单向操作，只读或者只写，如果在函数参数里写的是单向管道，那么传入的应该是一个双向管道，内处理应该自觉遵守它的单向要求
+
+20.标准的select写法
+go func(){
+  var e int
+  ok :=true
+  for{
+    select{
+       case e,ok=<-ch11 :
+            if !ok {
+              fmt.Println("closed")
+              break
+            }else{
+                fmt.Println(e)
+            }
+       default:
+           fmt.Println("default case")
+    }
+    if !ok {
+      break
+    }
+  }
+}()
+
+21.有没有容量的channel性质截然不同，有容量的是带缓存的，异步机制，发送方尽管发送，不管接收方能不能收到，不带容量的是默认0的不带缓存的，同步机制，数据的读入和写出，都必须在两端同时准备好的前提下进行.
+
+22.设置超时的官方方法:
+case <-time.NewTimer(12*time.Second).C:
+   fmt.Println("超时了")
+
+如果这块被放入了for循环，为了节省new timer的开销可以这样写:
+go func(){
+  var timer *timer.Timer
+  var ok = true
+ for{
+  select{
+    case <-func() <-chan time.Time{
+                if timer==nil{
+                  return time.NewTimer(12*time.Second).C
+                }
+		return timer.C        
+           }():
+        fmt.Println("超时了")
+        ok = false
+        break
+  }
+   if !ok {
+     break
+   }
+ }
+}
+
+//超时判断的干净写法
+ select {
+    case v := <-in:
+        fmt.Println(v)
+    case <-time.After(time.Second):
+        return // 超时
+    }
+
+AfterFunc(4*time.Second,f) 五秒以后执行f,f必须无参无返回值
+ 
+23.同步锁的使用
+*互斥锁 mutex
+func write(){
+  mutex.Lock()
+  defer mutex.Unlock()
+  //写操作
+}
+
+*sync.Mutex，sync.RWMutex 的默认零值都是可以直接使用的锁。
+
+*wg.done()等价于Add(-1) 计数减1
+
+*wg的常见用法
+func main(){
+  wg.Add(3)
+  go func(){
+   wg.done()
+  }()
+  go func(){
+   wg.done()
+  }()
+  go func(){
+   wg.done()
+  }()
+  wg.wait()
+  fmt.Println("三个任务都完成了")
+
+}
+
+
+func main() {
+    var wg sync.WaitGroup
+
+    // 开N个后台打印线程
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+
+        go func() {
+            fmt.Println("你好, 世界")
+             wg.Done()
+         }()
+    }
+
+    // 等待N个后台线程完成
+    wg.Wait()
+}
+
+24.包装的意义:!
+很多时候，把共有的部分提出来，可以有效的进行代码复用，但是更重要的是，提炼之后，只需要修改提炼一处，就能更改所有的提炼处配置，自适应性才是他的最大优势，比如把每一句fmt.println都提成Print()
+那么如果有需求需要把内容输出到文件中，而不是控制台，提炼以前需要查找每处fmt.println,提炼之后只需要修改Print()的输出路径到文件，就能让所有替换的位置自适应.
+
+25.数据模型的意义:
+数据模型的创建和定义一般仅仅是基于 前端到后台，后台到数据库 这种点跨点的场景需要定义数据类型，用来接收数据样式，但是不管是从前台拿还是从数据库接收，拿到的都是生数据，所以在数据的处理中，需要再用一层DTO来提炼。
+严格来说，数据类型基于层次划分，典型的就是vo dto model，分别用来vo接收前台数据，dto数据层对层交互，model接收数据库数据，严格来说，从control层到service层也应该用dto传递，但是仔细思量，其实从前台拿到的数据，本身
+就是生的，即安全无关的，所以可以直接基于方向定义数据类型，这样定义的类型数量和vo dto model相同，所以可以直接沿用，即从control走向dao的数据，都能用vo来传递，而从数据库出来的数据，因为需要安全性的过滤，逆向时
+才需要以dto回递,因为数据库本身就有过滤功能，为了降低dto和model的工作量，dto也不用那么严格，哼哼
+
+
+26.为协程创建timeout
+
+
+func never_leak(ch chan int) {
+	//初始化timeout，缓冲为1
+	timeout := make(chan bool, 1)
+	//启动timeout协程，由于缓存为1，不可能泄露
+	go func() {
+		time.Sleep(1 * time.Second)
+		timeout <- true
+	}()
+	//监听通道，由于设有超时，不可能泄露
+	select {
+	case <-ch:
+		// a read from ch has occurred
+	case <-timeout:
+		// the read from ch has timed out
+	}
+}
+
+func never_leak(ch chan int) {
+    //初始化timeout，缓冲为1
+    timeout := make(chan bool, 1)
+    //启动timeout协程，由于缓存为1，不可能泄露
+    go func() {
+        time.Sleep(1 * time.Second)
+        timeout <- true
+    }()
+    //监听通道，由于设有超时，不可能泄露
+    select {
+    case <-ch:
+        // a read from ch has occurred
+    case <-timeout:
+        // the read from ch has timed out
+    }
+}
+
+27.将windows项目部署到linux上
+首先，交叉编译
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o travel1.0
+其次，将生成的文件[travel1.0]发送到linux服务器上
+scp -P 22 travel1.0 tonnn@111.231.77.40:/home/tonnn/travel
+第三,ssh进入系统，查看上传好的文件
+ssh tonnn@111.231.77.40
+cd /home/tonnn/travel/
+ll
+把上传的文件，修改权限到可执行
+chmod 777 travel1.0
+第四，开启
+sudo supervisorctl restart media
+第五， 查看日志
+tail -n 100 /data/log/media.log
+
+28.如何在linux上跑go脚本
+重复27前三步，
+脚本是只不需要阻塞短期能跑完的程序，所以我们只需要执行即可,假设传来的脚本程序经过交叉编译是travel
+则执行他
+./travel
+
+29.如何控制goroutine退出
+func worker(cannel chan bool) {
+    for {
+        select {
+        default:
+            fmt.Println("hello")
+            // 正常工作
+        case <-cannel:
+            // 退出
+        }
+    }
+}
+
+func main() {
+    cannel := make(chan bool)
+    go worker(cannel)
+
+    time.Sleep(time.Second)
+    cannel <- true
+}
+这样每关闭一个goroutine都要有一个chan，为了节省开销，可以通过关闭管道，多播控制
+func worker(wg *sync.WaitGroup, cannel chan bool) {
+    defer wg.Done()
+
+    for {
+        select {
+        default:
+            fmt.Println("hello")
+        case <-cannel:
+            return
+        }
+    }
+}
+
+func main() {
+    cancel := make(chan bool)
+
+    var wg sync.WaitGroup
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+        go worker(&wg, cancel)
+    }
+
+    time.Sleep(time.Second)
+    close(cancel)
+    wg.Wait()
+}
+
+30.如何处理无法捕捉的异常错误
+func ParseJSON(input string) (s *Syntax, err error) {
+    defer func() {
+        if p := recover(); p != nil {
+            err = fmt.Errorf("JSON: internal error: %v", p)
+        }
+    }()
+    // ...parser...
+}
+把他转换为error即可
+
+31.如何测试一个东西的时间和空间:
+go test main.go main_test.go -bench=. -benchmem
+
+
+32.http.client 有连接池
+
+33.如何获取golang.x 翻墙也拿不到的问题
+mkdir -p $GOPATH/src/golang.org/x/
+cd $GOPATH/src/golang.org/x/
+git clone https://github.com/golang/net.git net
+go install net
+mkdir -p $GOPATH/src/golang.org/x/
+cd $GOPATH/src/golang.org/x/
+git clone https://github.com/golang/text.git text
+go install text
+
+原生http get post
+package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "log"
+    "net/http"
+    "strings"
+)
+
+type User struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+    r.ParseForm()
+    fmt.Println("Form: ", r.Form)
+    fmt.Println("Path: ", r.URL.Path)
+    fmt.Println(r.Form["a"])
+    fmt.Println(r.Form["b"])
+    for k, v := range r.Form {
+        fmt.Println(k, "=>", v, strings.Join(v, "-"))
+    }
+    fmt.Fprint(w, "It works !")
+}
+
+func test(w http.ResponseWriter, r *http.Request) {
+    body, _ := ioutil.ReadAll(r.Body)
+    //    r.Body.Close()
+    body_str := string(body)
+    fmt.Println(body_str)
+    //    fmt.Fprint(w, body_str)
+    var user User
+    //    user.Name = "aaa"
+    //    user.Age = 99
+    //    if bs, err := json.Marshal(user); err == nil {
+    //        fmt.Println(string(bs))
+    //    } else {
+    //        fmt.Println(err)
+    //    }
+
+    if err := json.Unmarshal(body, &user); err == nil {
+        fmt.Println(user)
+        user.Age += 100
+        fmt.Println(user)
+        ret, _ := json.Marshal(user)
+        fmt.Fprint(w, string(ret))
+    } else {
+        fmt.Println(err)
+    }
+}
+
+func main() {
+    http.HandleFunc("/", index)
+    http.HandleFunc("/test/", test)
+
+    if err := http.ListenAndServe("0.0.0.0:8080", nil); err != nil {
+        log.Fatal("ListenAndServe: ", err)
+    }
+}
+复制代码
+客户端代码示例：
+
+复制代码
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+    //    "log"
+    "net/http"
+    //    "strings"
+    "bytes"
+    "encoding/json"
+)
+
+type User struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+
+func main() {
+    resp, _ := http.Get("http://10.67.2.252:8080/?a=123456&b=aaa&b=bbb")
+    defer resp.Body.Close()
+    body, _ := ioutil.ReadAll(resp.Body)
+    fmt.Println(string(body))
+
+    var user User
+    user.Name = "aaa"
+    user.Age = 99
+    if bs, err := json.Marshal(user); err == nil {
+        //        fmt.Println(string(bs))
+        req := bytes.NewBuffer([]byte(bs))
+        tmp := `{"name":"junneyang", "age": 88}`
+        req = bytes.NewBuffer([]byte(tmp))
+
+        body_type := "application/json;charset=utf-8"
+        resp, _ = http.Post("http://10.67.2.252:8080/test/", body_type, req)
+        body, _ = ioutil.ReadAll(resp.Body)
+        fmt.Println(string(body))
+    } else {
+        fmt.Println(err)
+    }
+
+    client := &http.Client{}
+    request, _ := http.NewRequest("GET", "http://10.67.2.252:8080/?a=123456&b=aaa&b=bbb", nil)
+    request.Header.Set("Connection", "keep-alive")
+    response, _ := client.Do(request)
+    if response.StatusCode == 200 {
+        body, _ := ioutil.ReadAll(response.Body)
+        fmt.Println(string(body))
+    }
+
+    req := `{"name":"junneyang", "age": 88}`
+    req_new := bytes.NewBuffer([]byte(req))
+    request, _ = http.NewRequest("POST", "http://10.67.2.252:8080/test/", req_new)
+    request.Header.Set("Content-type", "application/json")
+    response, _ = client.Do(request)
+    if response.StatusCode == 200 {
+        body, _ := ioutil.ReadAll(response.Body)
+        fmt.Println(string(body))
+    }
+}
+
+
+
+
+type MyStruct struct {
+	A int
+	B int
+}
+
+var sizeOfMyStruct = int(unsafe.Sizeof(MyStruct{}))
+
+func MyStructToBytes(s *MyStruct) []byte {
+	var x reflect.SliceHeader
+	x.Len = sizeOfMyStruct
+	x.Cap = sizeOfMyStruct
+	x.Data = uintptr(unsafe.Pointer(s))
+	return *(*[]byte)(unsafe.Pointer(&x))
+}
+
+func BytesToMyStruct(b []byte) *MyStruct {
+	return (*MyStruct)(unsafe.Pointer(
+		(*reflect.SliceHeader)(unsafe.Pointer(&b)).Data,
+	))
+}
+
+// 限制测试b.N的范围
+    b.StopTimer()
+    var a = make([]BigStruct, 1000)
+    b.StartTimer()

@@ -1,0 +1,56 @@
+https://blog.csdn.net/fwhezfwhez/article/details/79656030  例子
+
+1.expire,YSlow,FireBug
+2.sudo nginx -s reload 重启,
+  sudo nginx -t  检查语法
+  cat /nginx-1.2.9/conf/extra/http_vhosts.conf  显示配置文件
+3.压缩功能
+gzip on;
+gzip_min_length 1k;
+gzip_buffers 4 16k ;  --四个单位的16k的缓存
+gzip_http_version 1.0;
+gzip_comp_level 2 ;--数字越大压缩越狠，但是cpu资源重，处理慢
+gzip_types text/plain application/x-javascript text/css application/xml;
+gzip_vary on;
+
+4.处理错误
+error_page 404 http://xxx首页
+error_page 403 /403.html   --需要配置root www;
+
+
+二. nginx 安装
+sudo yum install epel-release         // 通过该工具获得最新nginx
+sudo yum install nginx
+
+
+ **如何使nginx的性能达到最大值**
+ 1. worker数量=cpu数
+ `lscpu` 找到第四行，获得CPU(s):4,将nginx worker置为4最佳,或者auto将自动获取最大。
+ 
+ 2. 在events里添加唤醒锁，不然每次来请求，会将所有worker唤醒，影响性能,默认是on:
+ events{
+     accept_mutex on;
+ }
+ 
+ 3. 释放file上限
+ `cat /proc/sys/fs/file-max` 显示linux可打开的最大file数量，并且将nginx可打开file句柄限制置为其
+ 值的三分之二,留一点给其它程序，不然有潜在风险。
+ `cat /proc/sys/fs/file-max`  44603   本机最大开启44603文件
+ ```
+ ...
+ user nginx;
+ worker_processes auto;
+ worker_rlimit_nofile 30000;    将rlimit设置为30000，约等于44603的三分之二
+ ...
+ ```
+ 
+ 4. 设置多接模式，
+ events{
+     multi_accept on;   如果是off，则会多worker逐个接受指令.
+ }
+ 
+ 5. user nginx 改为user root
+ 避免不必要的权限问题。
+ 
+三. 理解：
+Transfer-encoding chunked 可以把传输转为流式，断点续传

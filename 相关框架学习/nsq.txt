@@ -1,0 +1,30 @@
+1.下载nsq:http://nsq.io/deployment/installing.html
+2.配置，把下载安装好的bin放置到path里
+
+3.概念
+nsqlookupd 
+nsqlookupd 是守护进程，负责管理拓扑信息并提供最终一致性的发现服务。客户端通过查询 nsqlookupd 来发现指定话题（topic）的生产者，并且 nsqd 节点广播话题（topic）和通道（channel）信息。
+
+该服务运行后有两个端口：TCP 接口，nsqd 用它来广播；HTTP 接口，客户端用它来发现和管理。
+在生产环境中，为了高可用，最好部署三个nsqlookupd服务。
+
+nsqd 
+nsqd 是一个守护进程，负责接收，排队，投递消息给客户端。 
+它可以独立运行，不过通常它是由 nsqlookupd 实例所在集群配置的（它在这能声明 topics 和 channels，以便大家能找到）。
+
+服务启动后有两个端口：一个给客户端，另一个是 HTTP API。还能够开启HTTPS。
+同一台服务器启动多个nsqd，要注意端口和数据路径必须不同，包括：–lookupd-tcp-address、 -tcp-address、–data-path。
+删除topic、channel需要http api调用。
+
+nsqadmin 
+nsqadmin 是一套 WEB UI，用来汇集集群的实时统计，并执行不同的管理任务。 
+运行后，能够通过4171端口查看并管理topic和channel。
+
+通常只需要运行一个。
+
+4.运行
+cmd-nsqlookupd
+cmd-nsqd --lookupd-tcp-address=127.0.0.1:4160
+cmd-nsqadmin --lookupd-http-address=127.0.0.1:4161
+git bash here-curl http://127.0.0.1:4151/pub?topic=test -d 'hello world 1'
+browser:http://127.0.0.1:4171/  到此步，已经可以在可视化地址上看到数据库了

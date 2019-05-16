@@ -1,0 +1,131 @@
+1.双向绑定
+在js里的变动，会直接引起html里的变动，即页面会跟随变化，在html里的变化也会跟随进js里的变动
+
+2.<template><style><script>对应html，javascript,css三种样式
+
+3.cd es6
+  npm run dev
+  
+4. let 只作用在{}局部，var是全局, let [a,b,c]=["aa",7,1.2]
+   缺省赋值： let [a,,c]=["aa",7,1.2]
+   默认赋值   let [a,b,c=2.3] = ["aa",7,1.2]
+   获取对象里的值
+   let obj = new Object();
+   obj.uname = 'ft';
+   obj.age = 25;
+   
+   let {uname:name,age:a} = obj;
+   alert(name,a)
+   
+   或者 let uname,age;
+   //只拿需要的 ({uname}=obj)
+   ({uname,age}=obj)   //不加小括号就会被视作代码块而赋值失败
+   //嵌套  ({arr[a,b]}=obj); alert(a)
+   alert(uname,age)
+   
+5.  var set = new Set([1,2,3])
+for (var elem of set){
+	console.log(elem)
+}
+
+迭代数组的方法：
+[1,2,3,4].map(function(elem){
+	console.log(elem);
+});
+
+
+二. vue 的注意事项
+1. data的值永远是一个函数,否则会变成单例，被所有调用方共享。 ps: computed 值也为函数,可监听变化
+// good
+Vue.component('some-comp', {
+  data: function () {
+    return {
+      foo: 'bar'
+    }
+  }
+})
+// bad
+Vue.component('some-comp', {
+  data: {
+    foo: 'bar'
+  }
+})
+
+2. props 要写详细，在你提交的代码中，prop 的定义应该尽量详细，至少需要指定其类型。
+// good
+props: {
+  status: String
+}
+// better
+props: {
+  status: {
+    type: String,
+    required: true,
+    validator: function (value) {
+      return [
+        'syncing',
+        'synced',
+        'version-conflict',
+        'error'
+      ].indexOf(value) !== -1
+    }
+  }
+}
+
+// bad
+props: ['status']
+
+3. 设置类似 eyas-button 来防止组件效果被一些全局/第三方的 .button 污染
+
+4. TheHeading.vue The-命名表示唯一组件, 父组件前缀代替文件夹深度
+
+5. 组件名应该以高级别的 (通常是一般化描述的) 单词开头，以描述性的修饰词结尾。  SearchButtonRun
+
+6. <style>放最后
+<template>...</template>
+<script>/* ... */</script>
+<style>/* ... */</style>
+
+7. 元素选择器应该避免在 scoped 中出现。
+// good
+<template>
+  <button class="btn btn-close">X</button>
+</template>
+
+<style scoped>
+.btn-close {
+  background-color: red;
+}
+</style>
+
+// bad
+<template>
+  <button>X</button>
+</template>
+
+<style scoped>
+button {
+  background-color: red;
+}
+</style>
+
+8. 全局属性，用$开头,该字段在全局Vue实例创建以前就init好了,这个叫'原型'定义
+Vue.prototype.appName = 'eyas-sales-pc'
+
+使用Object.freeze() 防止全局实例被修改
+var App = Object.freeze({
+  name: 'My App',
+  version: '2.1.4',
+  helpers: {
+    // 这我们之前见到过的 `$reverseText` 方法
+    // 的一个纯函数版本
+    reverseText: function (text) {
+      return text
+        .split('')
+        .reverse()
+        .join('')
+    }
+  }
+})
+
+9. Chrom shift+esc 可以看内存使用情况

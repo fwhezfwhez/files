@@ -1,0 +1,4 @@
+1.ROI 回报率
+  其中，收入r和成本q和广告,用户，环境有关
+  CPT 按时间计
+  MRP market reserve price 市场保留价，即底价

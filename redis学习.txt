@@ -1,0 +1,12 @@
+1.https://github.com/MicrosoftArchive/redis/releases 安装网站
+
+2.redis-server.exe redis.windows.conf
+情况1:可能出现配置文件找不到的错误，并报错CWD:xxx路径，只需要把redis安装路径下的redis.windows.conf拷贝一份放到CWD路径下即可
+情况2:找不到该命令，在环境变量中配置path指向redis安装路径E:\REDIS
+
+3.开启服务以后，可以连接
+
+4.进入客户端redis-cli
+选择索引1 select 1
+插入list  lpush mylist "1" 
+删除key   del mylist

@@ -1,0 +1,178 @@
+https://www.elastic.co/downloads/elasticsearch 官方下载
+jdk1.8
+https://github.com/olivere/elastic go驱动包
+https://github.com/elastic/go-elasticsearch 官方驱动包，和上面选一个
+https://www.elastic.co/cn/start
+安装插件的方法:elasticsearch-plugin install x-pack
+
+1.elastic 有弹性的，灵活的
+cluster 集群
+Node 节点 
+shards 索引分片 分布给分布式的集群
+replicas 索引副本 防止分片丢失的备份 
+recovery 数据恢复与重新分配shards的统称
+river 数据源，官方的river有RabbitMQ,Twitter等
+gateway 也是一个索引备份，是一个索引快照的备份
+discovery.zen 自动发现节点机制
+transport 内部交互协议，默认是tcp，也支持http(json格式) servlet等其他协议
+Replia:副本
+
+2.下载服务后安装，安装1.8以上jdk，然后cd到安装路径bin下，执行elasticsearch.bat，服务开启,ctrl+c服务停止
+
+3.git bash 桌面
+-curl localhost:9200
+  获取服务相关数据
+  "name" : "LDw_Ev8",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "6EwWEPzJS5mX9-6gT4Tp0g",
+  "version" : {
+    "number" : "6.2.2",
+    "build_hash" : "10b1edd",
+    "build_date" : "2018-02-16T19:01:30.685723Z",
+    "build_snapshot" : false,
+    "lucene_version" : "7.2.1",
+    "minimum_wire_compatibility_version" : "5.6.0",
+    "minimum_index_compatibility_version" : "5.0.0"
+  },
+  "tagline" : "You Know, for Search"
+}
+
+*服务化
+在安装路径下 config/elasticsearch.yml,去掉注释network.host，修改为network.host: 10.0.203.92,即本机网ip
+每个elastic实例为一个node，多个节点组成cloud,通过索引来找到数据，所以顶层单位就是index，类比于数据库，index的索引名必须小写
+
+- curl -X GET 'http://localhost:9200/_cat/indices?v'
+  查看当前所有节点
+ 
+ 4.index下是多条记录，每条记录是一条document，每条document是一个json对象比如:
+ {
+   "movie":"张三",
+   "year":1999
+ }
+ 同一个document下记录不要求同结构，但是同结构有利于搜索速度
+ 
+ 5.
+ *对Index weather操作
+	 新建
+	 -curl -X PUT 'localhost:9200/weather'
+	 删除
+	 -curl -X DELETE  'localhost:9200/weather'
+ *对Type和Document 操作
+	 新增
+	 -$ curl -X POST 'localhost:9200/accounts/person' -d '
+	{
+	  "user": "李四",
+	  "title": "工程师",
+	  "desc": "系统管理"
+	}'
+	 查看结构
+	 -$ curl 'localhost:9200/accounts/person/1?pretty=true'
+	 对Document
+	 删除
+	 -$ curl -X DELETE 'localhost:9200/accounts/person/1'
+	 修改
+	 -$ curl -X PUT 'localhost:9200/accounts/person/1' -d '
+	{
+		"user" : "张三",
+		"title" : "工程师",
+		"desc" : "数据库管理，软件开发"
+	}' 
+	查询
+	$ curl 'localhost:9200/accounts/person/_search'  -d '
+	{
+	  "query" : { "match" : { "desc" : "管理" }},
+	  "from": 1,
+	  "size": 1
+	}'
+	or查询
+	-$ curl 'localhost:9200/accounts/person/_search'  -d '
+	{
+	  "query" : { "match" : { "desc" : "软件 系统" }}
+	}'
+	and查询
+	$ curl 'localhost:9200/accounts/person/_search'  -d '
+	{
+	  "query": {
+		"bool": {
+		  "must": [
+			{ "match": { "desc": "软件" } },
+			{ "match": { "desc": "系统" } }
+		  ]
+		}
+	  }
+	}'
+	
+6.match,term,range的区别;filter上下文和query上下文的区别
+match符合包含，term必须精准匹配,range为范围
+实例:
+GET /_search
+{
+  "query": { 
+    "bool": { 
+      "must": [
+        { "match": { "title":   "Search"        }}, 
+        { "match": { "content": "Elasticsearch" }}  
+      ],
+      "filter": [ 
+        { "term":  { "status": "published" }}, 
+        { "range": { "publish_date": { "gte": "2015-01-01" }}} 
+      ]
+    }
+  }
+}
+query块表示有多符合，会计算评分，filter块表示是否符合，不影响上述评分
+
+6.发送数据要加上body type
+-H 'Content-Type: application/json'
+比如 
+-$ curl -X PUT 'localhost:9200/accounts/person/1' -H 'Content-Type: application/json' -d '
+	{
+		"user" : "张三",
+		"title" : "工程师",
+		"desc" : "数据库管理，软件开发"
+	}'
+
+7.对es设置跨域,在yml末尾添加
+http.cors.enabled: true  
+http.cors.allow-origin: "*"
+
+8.elasticsearch 6.x
+1.已经不再支持同index不同type
+2.不再支持parentchild模式，使用join field替换 ，
+3.默认的mapping type已经下架
+4.已经移除了_all这个api
+
+9.field的几个默认属性介绍:
+store:true  表示这个字段会被独立存储，而不会被存到_source里，这样读取的速度就会快很多，缺点是store的字段过多，索引就会越大，哼哼
+
+10.乐观并发锁
+悲观锁的做法是锁定对象，不让线程进来操作，而乐观锁的做法是，让你进来，但是会执行失败
+
+11.分词和标准化的过程称为 分析
+POST _analyze/ 
+{"analyzer":"standard","text":"我是中国人"} 
+
+POST _analyze/ 
+{"analyzer":"smartcn","text":"我是中国人"} 
+设置分词器
+类似的分词器还有english,可以让cats 映射成cat
+
+12.为什么bulk api要支持换行符而不是json
+因为不能保证每个要索引的文档都在同一个节点上，所以如果用json，还得解析造成不必要的开销
+
+13.端点搜索不支持中文，怎么办呀！！！！
+还有，端点搜索+是放在要搜索主体前面
+_search?q=+smith+jone
+
+14.数据类型只有string支持全文搜索,一个字段有几个field
+"userName":{
+	"type":"string",		//如果type是其他的integer，date等，只有index为no和analyzed有效
+	"index":"not_analyzed"  //还有no,analyzed分别表示不索引和全文索引
+}
+
+15.**string类型在6x已经没了，完全被text替换了
+   **index的值已经只支持true和false了
+   
+16.数据类型还有 object，表示对象内部嵌json对象的内嵌对象
+
+17.es在内部嵌套时会进行扁平化处理，对数组就很容易破坏他的相关性，这种具有相关性的内部对象，叫做nested对象。

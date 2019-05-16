@@ -1,0 +1,62 @@
+1.游戏- 仙侠道
+协议层自动生成模块代码，数据库层也是自动生成，只关注业务层代码
+protobuf
+自定义协议块：
+//玩家模块
+mod player =0
+{
+	type login_status enum8{
+		FAIL = 0
+		SUCCESS = 1
+		FIRST_TIME = 2  //首次登陆
+	}	
+	//玩家登陆
+	api login = 0 {
+		in{
+			user:text //用户账号
+		}
+		out{
+			status:login_status  //登陆结果
+			player_id : int 64 //玩家在游戏内的id
+		}
+	}
+}
+
+通过解协议包自动生成:
+Package UserControl
+type LoginStatus int8
+const(
+	LOGIN_STATUS_FAIL = 0
+	LOGIN_STATUS_SUCCESS = 1
+	LOGIN_FIRST_TIME = 2
+)
+
+type Login_In struct{
+	user []byte
+}
+type Login_Out struct {
+	Status LoginStatus
+	PlayerId int64
+}
+
+func (this Login_In) Readxxxx{}
+func (this Login_Out) Wxxxx{
+}
+数据要距离cpu近
+
+数据库切片
+
+内存事务的两种形式:
+假提交:
+提交前后数据变化:
+
+长连接的假死模型
+gc开一个协程去管理
+Go 可视化
+压测集群
+
+
+go vendering  做版本控制  go dep save
+再严格就要用容器技术了
+
+YAML 配置方法学习

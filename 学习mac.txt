@@ -1,0 +1,7 @@
+uname -a  #查看系统位数
+
+pip3 install django  #安装django
+python3 -m django --version  #查看安装版本
+
+对项目配置虚拟环境
+virtualenv --python=python3 venv

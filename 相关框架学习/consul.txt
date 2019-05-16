@@ -1,0 +1,17 @@
+1. 安装consul ，添加consul.exe路径进path
+
+2. 开发模式启动agent,该模式未持久化:
+`consul agent -dev`
+
+3. 添加一个helloworld 服务
+## 单独注册配置文件consul.d：##
+```json
+{
+	"service": {
+		"name": "web",
+		"tags": ["rails"],
+		"port": 80
+	}
+}
+```
+或者通过框架自动put注册服务(go-micro)

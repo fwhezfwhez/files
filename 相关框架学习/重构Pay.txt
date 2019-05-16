@@ -1,0 +1,13 @@
+OrderHandler
+|map[string]OrderEvent  ÊµÀý:key:ÂÌµØÂÃÓÎ,event: TravelEvent
+| 
+|--->Add(key,OrderEvent)
+|--->Abort(key)
+|--->Pause(key) 
+
+OrderEvent
+|Flag   -1-abort 1-ok 2-pause
+|OrderInput      {cid,pversion,...}
+|ServiceHandler  {callDistributionSystem,callDistributionText}
+
+

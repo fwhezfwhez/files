@@ -1,0 +1,145 @@
+pprof
+
+ps:
+逃逸分析:go build -gcflags '-m -m' main.go
+消除内联:go build -gcflags '-m -l' main.go
+gc轨迹分析: GODEBUG=gctrace=1 go run main.go 标准输出
+            GODEBUG=gctrace=1 go run main.go 2>xx.log  输出到该路径的xx.log文件里，多次执行覆盖
+			
+运行main.go 并将逃逸分析和gc打印到同级目录的xx.log			GODEBUG=gctrace=1 go run -gcflags '-m -m' main.go 2>xx.log
+GODEBUG=gctrace=1 ./srv 2>/data/xx.log    
+
+1. 生成mem.prof和cpu.prof文件
+执行代码
+```go
+type JR struct {
+	Name string          `json:"name"`
+	Data json.RawMessage `json:"data"`
+}
+
+func main() {
+	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to `file`")
+	var memprofile = flag.String("memprofile", "", "write memory profile to `file`")
+	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
+
+	// ... rest of the program ...
+	var cm = make(map[string]JR)
+	var tmp string
+	for i := 0; i < 100000; i++ {
+		tmp = fmt.Sprintf("user_%d", i)
+		cm[tmp] = JR{Name: tmp, Data: []byte(`{"kk":9}`)}
+	}
+	fmt.Println(len(cm))
+
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile: ", err)
+		}
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+		f.Close()
+	}
+}
+```
+
+先执行go run main.go --cpuprofile=cpu.prof --memprofile=mem.prof,在该路径下产生了mem.prof 和 cpu.prof剖面文件
+`go tool pprof main.go cpu.prof` 进入分析 cpu分析  // 同理 go tool pprof main.go mem.prof
+
+`top19`  取前19个相关节点
+```go
+Duration: 19.02s, Total samples = 10ms (0.053%)
+Entering interactive mode (type "help" for commands, "o" for options)
+
+(pprof) top19
+Showing nodes accounting for 10ms, 100% of 10ms total
+      flat  flat%   sum%        cum   cum%
+      10ms   100%   100%       10ms   100%  runtime.cgocall
+         0     0%   100%       10ms   100%  internal/syscall/windows/registry.Key.GetMUIStringValu
+e
+         0     0%   100%       10ms   100%  internal/syscall/windows/registry.regLoadMUIString
+         0     0%   100%       10ms   100%  log.(*Logger).Output
+         0     0%   100%       10ms   100%  log.(*Logger).formatHeader
+         0     0%   100%       10ms   100%  log.Println
+         0     0%   100%       10ms   100%  main.main
+         0     0%   100%       10ms   100%  runtime.main
+         0     0%   100%       10ms   100%  sync.(*Once).Do
+         0     0%   100%       10ms   100%  syscall.Syscall9
+         0     0%   100%       10ms   100%  time.(*Location).get
+         0     0%   100%       10ms   100%  time.Time.Date
+         0     0%   100%       10ms   100%  time.Time.abs
+         0     0%   100%       10ms   100%  time.Time.date
+         0     0%   100%       10ms   100%  time.abbrev
+         0     0%   100%       10ms   100%  time.initLocal
+         0     0%   100%       10ms   100%  time.initLocalFromTZI
+         0     0%   100%       10ms   100%  time.matchZoneKey
+         0     0%   100%       10ms   100%  time.toEnglishName
+```
+
+该文件是在go程序每秒暂停了100次记录的一些样本,解释:
+排序 : 样本是按照flat占用比排序的！
+
+flat 表示样本覆盖总时间，比如所有样本总时间是10ms，99.9% 被runtime.cgocall(从函数执行到函数return的运行部分) 占用了，其它的应该是约等于0。
+
+falt% 表示样本覆盖率， runtime.cgocall占据了总样本时间的几乎全部100%,从这可以推测，runtime/pprof的核心代码都是用c写的，所以需要要cgo去调用，并且占了整个程序的约百分之百的部分,还验证了另一件事，那就是time.Sleep()不会消耗cpu.
+睡眠和阻塞时，不计入flat和cum的统计，但是计入总duration
+
+sum%  表示该行以上(含改行) 已被列出的 flat%之和，该例子可能看不太明显，换一个官方的例子:
+```go
+(pprof) top10
+Total: 2525 samples
+     298  11.8%  11.8%      345  13.7% runtime.mapaccess1_fast64
+     268  10.6%  22.4%     2124  84.1% main.FindLoops
+     251   9.9%  32.4%      451  17.9% scanblock
+     178   7.0%  39.4%      351  13.9% hash_insert
+```
+11.8 = 11.8
+22.4 = 10.6 + 11.8 
+32.4 = 22.4 +9.9 
+39.4 = 7 + 32.4
+官方文档是旧版的，flat计数采用的是样本数量，后来的都是按照时间持续划分sample，所以实例是10ms,0,0,0 ,官方旧版的是298,268,251,178
+
+cum 官方的解释翻译过来是函数在样本里运行和等待的时间，当样本采样里，假定总和是100ms，一个函数一直在执行，flat和cum都可以是100ms，但是如果函数跑了50ms，另外50ms正在等待其他函数的返回，则flat50ms，cum100ms，
+    
+2. web
+产出 内存分析 图表，并被浏览器打开
+* 一个方块里， 英文表示函数名，0 of 20ms(50%)表示 0 flat, 20 cum, 50% cum%  含义是: 20ms的执行和等待总和，0ms的执行,该函数大多时候在等待其他函数的结束，进行收尾
+* 如果见到方块明显更大，并且只有函数名、10ms(25%) 三个参数，则表示cum和flat都是10ms,占25%,含义是: 该块执行部分≈执行等待和，即全生命周期都在运行，理解为cpu繁忙的块
+* X->Y 表示x调用y
+* X--10ms-->Y 表示x调用在样本里占据了10ms cum
+
+3. web main
+聚焦到关键字 main的方块附近(模糊匹配)
+
+4. list main.main  可以定位开销昂贵的代码块
+   weblist main.main  在浏览器里查看图标，效果和list一致，排序是flat和cum
+   
+   
+5. 附带web 版的heap,routine,cpu分析
+
+```go
+import (
+    "net/http"
+    _ "net/http/pprof"
+)
+go func() {
+            log.Println(http.ListenAndServe("localhost:8081", nil))
+}()
+```
+go tool pprof  http://127.0.0.1:8081/debug/pprof/heap       //查看堆的使用，即内存使用情况
+go tool pprof  http://127.0.0.1:8081/debug/pprof/profile    //查看cpu耗时，会详细列出每个函数的耗时
+go tool pprof  http://127.0.0.1:8081/debug/pprof/goroutine  //当前在运行的goroutine情况以及总数
+   
+

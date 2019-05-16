@@ -1,0 +1,58 @@
+1. python -m django --version
+2. django-admin startproject mysite
+3. python manage.py runserver 8000
+4. visit http://127.0.0.1:8000/
+
+
+二.博客系统
+1. django-admin startproject myblog
+2. python manage.py runserver 8000
+3. visit http://127.0.0.1:8000/
+4. python manage.py startapp blog
+5.在settings.py里的INSTALLED_APP里添加blog,blog不可和库里的模块冲突
+6.把路由方法添加进urls:
+ from django.contrib import admin
+ from django.urls import path
+ import blog.views as bv
+ urlpatterns = [
+     path('admin/', admin.site.urls),
+     path('index/', bv.index),
+ ]
+7.使用include管理url
+ from django.conf.urls import url,include
+ url(r'^index/',include('blog.urls')
+ 
+ 在 blog 要新建urls.py,同时内部要引入views，才能使用views里的方法，同时path要以'/'收尾
+8. django会按照installapp里找templates，会冲突，如果每个app都有tmplates文件夹,搜寻的template文件夹会省略掉路径，解决templates冲突的方法是，在每个app的templates文件夹里多建一个app 名字的文件夹，并把页面放进去，同时
+ views里的render方法参数多加一个appname/index.html
+ 
+9.使用model
+ 创建models.py,引入models模块，创建类继承models.Model,该类即是i数据表
+ class Article(models.Model):
+     title = models.CharField(max_length=32,default='Title')
+	 content = models.TextField(null=True)
+10.同步数据进数据库
+   python manage.py makemigrations appname #准备迁移内容,appname不写则同步所有
+   python manage.py  migrate #执行迁移，类似git add和git push
+   准备执行后会在migreation里生成移植包类似0001——initial.py
+   执行python manage.py sqlmigrate appname 0001 可以看到该sql语句
+   
+   
+11. Admin功能 允许授权的用户直接操作数据库   
+   创建超级用户:python manage.py createsuperuser 
+   中文版: 把settings.py里的LANGUAGE_CODE = 'zh_Hans'
+   如何让这个管理系统管理app:
+   在admin.py中引入自身的models模块，并添加:admin.site.register(models.Article) 
+   如何修改数据的显示默认名称:为Article添加方法，p3为_str_(self),p2为_unicode_(self)
+   return self.title
+12. 使用param方式来制作/article/1 这样的get路由 
+	url(r'^article/(?P<article_id>[0-9]+)$',views.query_one)
+	并且添加query_one方法进view
+	def query_one(request,article_id):
+    art = models.Article.objects.get(pk=article_id)
+    return render(request, "blog/index.html",{'option': 'query', 'article':art})
+	
+三.高级
+1.添加模块
+python3 manage.py startapp infomation  apps/infomation
+	

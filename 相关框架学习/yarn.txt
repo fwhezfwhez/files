@@ -1,0 +1,4 @@
+yarn global add vue-cli     //全局安装vue-cli
+
+一. yarn 工作流
+yarn init  // 出现Can't answer a question unless a user TTY，则在cmd里输入

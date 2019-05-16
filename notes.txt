@@ -1,0 +1,7 @@
+1.win10下调用cmd窗口.
+右键开始-运行-cmd
+
+2.go run test.go 执行test文件
+
+3.修改eclipse字体大小
+window-preference-general-appearance-colors and fonts-basic-text font

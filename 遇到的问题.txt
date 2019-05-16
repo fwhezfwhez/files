@@ -1,0 +1,24 @@
+1.go不是内部命令，添加go/bin目录到path
+
+2.go run test.go 报错找不到文件
+修改查看文件尾缀，确认不是test.go.text
+
+3.eclipse打不开缺少jre环境，安装jdk解决.
+
+4.gocode.exe要下载源码，cd到指定目录go build来生成，才有效。
+
+5.eclipse工程上出现红叉，不存在语法问题，project-clean即可
+
+6.不同文件go之间函数调用，和文件名没有关系
+在src下建立data文件夹，建立funs.go于它下，那么如果在main.go中要运用到funs.go里的Fun()方法
+则只要import "data",并在main种data.Fun();
+
+7.类型:sql.DB,error,Rows,Row
+       Query和QueryRow 
+       Result
+       Scanner
+       Stmt
+       Tx数据库事务
+      
+Result里有LastInsertId()接口和RowsAffected()接口
+设计数据库回避null

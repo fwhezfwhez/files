@@ -1,0 +1,115 @@
+学习记录:
+https://doc.yonyoucloud.com/doc/docker_practice/repository/local_repo.html
+
+常见参数意义：
+-t    title,
+-d    work background
+
+sudo yum install docker  安装
+sudo service docker start  	开启
+sudo chkconfig docker on    开机自动启动
+
+docker常见命令
+一.镜像
+docker info  查看信息
+sudo service docker start docker服务开启
+sudo chkconfig docker on 开启系统启动自动加载docerk
+docker pull ubuntu:12.04  拉取一个ubuntu，版本12.04
+sudo docker pull dl.dockerpool.com:5000/ubuntu:12.04  从另一个数据源拉取相同的镜像
+sudo docker run -t -i ubuntu:12.04 /bin/bash   进入这个镜像
+docker images  显示本地已有镜像，或者docker image ls
+docker commit -m "edit a container" -a "fwhez" 1c5a1f8bd6ee test_image_gen:v1  对已经运行的容器修改后，如何持久化成一个新的镜像，-m 信息， -a 操作用户 容器id， 新镜像名:标签
+docker rmi xzczxcxzcxzcxzc     删除镜像id为xzczxxxxx的镜像
+docker build -t="my_image:v1" .  注意这个点，表示当前路径，会在该路径下的dockerfile产出一个根据内容设置好的镜像.
+ docker load --input ubuntu_14.04.tar   导出到本地
+ docker load < ubuntu_14.04.tar  	导入到镜像库
+ docker rmi 和docker rm  删除镜像和容器,在删除镜像之前要先用 docker rm 删掉依赖于这个镜像的所有容器
+ 
+ 二.容器
+ docker run -t -i xxxx:tag        -t表示打开伪终端，-i表示保持输入开启,
+ docker start xxx         启动一个已经终止的容器
+ docker stop xxx          停止一个容器， xx表示容器id或者容器name,推荐使用name，因为可以用TAB 索引提示出来
+ docker run -d ubuntu:latest /bin/sh -c "while true; do echo hello world; sleep 1; done"         以后台形式运行docker，使用docker logs 该容器id，可以查看到打印日志
+ docker ps -a   查看最近的容器操作流水
+ docker run -idt --rm ubuntu:latest   缩写-t -i -d 守护态后台运行，并提供终端
+ docker attach xxx   xx表示容器name或者id，切换进入该运行的容器命令行
+ 
+ 三. 仓库
+  sudo docker run -d -p 5000:5000 registry 搭建私人仓库
+ 
+问题:
+1.如何区别镜像是否为同一个?
+通过image id来标识是否为同一个镜像
+
+2.不知道进入什么版本的镜像，有什么好思路?
+使用tag:latest,trusty,precise，
+docker run -t -i unbuntu:latest
+
+3.镜像id和容器id有什么区别?
+一个镜像可以多次启动容器也可以一次性启动多个容器，各个容器都是以这个镜像为基础，每个容器都有唯一的容器id，但是这个唯一的镜像只用镜像id标识。
+
+4.制作镜像的几种方式:
+1.通过运行的容器，或者是已有的镜像生产出新镜像。通过docker run 开启容器，docker commit 打包成新镜像
+2.基于docker file生产出镜像
+3.导入下载好的镜像docker import - ubuntu:14.04
+
+5.如何写一个docker file以及常见语句?
+关键字:FROM MAINTAINER ADD RUN CMD EXPOSE
+# this is a test writing docker file
+FROM ubuntu:latest
+MAINTAINER fwhezfwhez <1728565484@qq.com>
+RUN apt-get -qq update
+RUN apt-get -qqy install ruby ruby-dev
+ADD xxx.txt /
+EXPOSE 8098
+CMD ["echo happpy"]
+
+
+6. 生产中常用场景:
+1. 查看运行中的容器: `docker container ls`
+2. 停止所有容器:  
+3. 在某个容器内执行命令: `docker exec -it b0 bash`    b0是容器的唯一id   bash 表示要在容器中执行的命令。
+4. 跑启一个容器，进入终端，退出时后台运行  docker run -t -i -d xxxx:tag
+5. 上传容器: docker tag 镜像id  fwhezfwhez/tcpx:v1
+             docker push fwhezfwhez/tcpx:v1
+6. 容器拉取 docker pull fwhezfwhez/tcpx
+7. 查看控制台日志 docker logs <container_id>
+
+8. 具备重启策略的开启容器: docker run --restart=on-failure:10 redis
+
+9. 容器内作了修改并保存
+docker commit -a 'fwhez' -m "add helloworld"  happy_lewin alpine:self
+其中，-a为提交者信息，-m 为更新信息， happy_lewin为容器id或name， alpine:self 为更新后生成的镜像名和tag
+
+10. 安全地进入容器内部的终端
+docker exec -i -t 容器id或name /bin/sh
+
+11. ll = ls -l
+
+12. 创建配置文件挂载点，并指定某些容器，挂载到该点上.
+# 创建挂载点容器
+docker run -idt --rm -v /configs --name configs alpine:latest
+# 创建服务1，2并使用挂载点
+docker run -idt --rm --volumes-from configs --name service1 alpine:latest
+docker run -idt --rm --volumes-from configs --name service2 alpine:latest
+# 测试,三个cmd窗口
+docker exec -it configs /bin/sh
+docker exec -it configs /bin/sh
+docker exec -it configs /bin/sh
+
+在任意一个/configs/下创建文件，都会适配到3者中。
+解释:
+--name 可以指定容器名,name是精准查找，要写全，容器id是模糊，前5位都行
+-v Volumn缩写，挂载点对应路径
+其它的略了
+
+13. 删除所有未运行的容器
+docker container prune -f
+删除所有未使用的镜像
+docker image prune -f
+
+14. 在已运行的容器文件传输
+docker cp main reverent_noyce:/main 将主机main，传给容器的/main
+
+15. 在已运行容器里，修改restart策略
+docker update –-restart=always xxx 

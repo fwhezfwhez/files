@@ -1,0 +1,17 @@
+1. dependcy 同micro.txt
+
+2. 
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. path/to/greeter.proto
+其中 proto_path 表示 该命令执行的起始位置，不带则默认当前路径
+micro_out 表示xxx.micro.go 的输出路径
+go_out 表示xxx.pb.go 的输出路径
+最后一个为proto文件所在路径,相对于proto_path
+
+protoc --go_out=. goods.proto
+3. 开启网关并指定端口
+micro api --handler=rpc     --address=:8080   --namespace=gomicrodemo1
+目前已知的handler可以接受[rpc,api,http,event] 这些请求, event触发时会把所有的方法执行
+http 可以通过以下几种方式达成:
+1. handler=api, 远程调用函数里，处理细节req.Method,req.Header 之类,写resp的body json   https://github.com/micro/examples/tree/master/api/api
+2. 使用endpoint，需要指定path,handler，method和handler，比第一种更明确。    https://github.com/micro/examples/tree/master/api/meta
+3. 使用go-web，指定handler=http                 https://github.com/micro/examples/tree/master/api/proxy

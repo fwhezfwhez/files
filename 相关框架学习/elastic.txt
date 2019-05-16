@@ -1,0 +1,757 @@
+1.github.com/olivere/elastic
+
+2.https://github.com/olivere/elastic/wiki  详细教程
+  
+3.https://olivere.github.io/elastic/ 简易教程
+
+https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html官方指南
+
+discuss.elastic.co 官方社区论坛
+
+4.我的博客
+http://blog.csdn.net/fwhezfwhez/article/details/79380275
+
+5.DSL语言
+PUT test2
+{
+	"settings":{
+		"number_of_shards": 1,
+		"number_of_replicas": 0
+	},
+	"mappings":{
+		"user":{
+			"properties":{
+			  "name":{
+					"type":"keyword"
+				},
+			 "message":{
+					"type":"text",
+					"store": true,
+					"fielddata": true
+			 }
+			}
+		}
+	}
+}
+
+//创建index
+/*
+	创建了一个叫"movies"的数据库，它的mapping样式如下，Type名是"movie",keyword类型都将被term query到,text不会被索引到
+*/
+PUT movies
+{
+  "settings":{
+			"number_of_shards": 1,
+			"number_of_replicas": 0
+		},
+		"mappings":{
+			"movie":{
+				"properties":{
+					"name":{
+						"type":"keyword"
+					},
+					"year":{
+					  "type": "keyword"
+					},
+					"country":{
+					  "type": "keyword"
+					},
+					"description":{
+					  "type": "text"
+					}
+				}
+			}
+		}
+}
+
+
+6.BodyString 和BodyJson的区别，{id:5,name:"ft"}是json，`{"id":"5","name":"ft"}`是string,反引号在波浪线那，而不是单引号
+
+
+一.基础
+-1. 
+我们受雇于 Megacorp 公司，作为 HR 部门新的 “热爱无人机” （_"We love our drones!"_）激励项目的一部分，我们的任务是为此创建一个雇员目录。该目录应当能培养雇员认同感及支持实时、高效、动态协作，因此有一些业务需求：
+
+支持包含多值标签、数值、以及全文本的数据
+检索任一雇员的完整信息
+允许结构化搜索，比如查询 30 岁以上的员工
+允许简单的全文搜索以及较复杂的短语搜索
+支持在匹配文档内容中高亮显示搜索片段
+支持基于数据创建和管理分析仪表盘
+
+-2.插入雇员
+//不用考虑先建megacorp index 和type employee，直接put会自动生成
+PUT /megacorp/employee/1
+{
+    "first_name" : "John",
+    "last_name" :  "Smith",
+    "age" :        25,
+    "about" :      "I love to go rock climbing",
+    "interests": [ "sports", "music" ]
+}
+
+//create another
+PUT /megacorp/employee/2
+{
+    "first_name" :  "Jane",
+    "last_name" :   "Smith",
+    "age" :         32,
+    "about" :       "I like to collect rock albums",
+    "interests":  [ "music" ]
+}
+//create thrid
+PUT /megacorp/employee/3
+{
+    "first_name" :  "Douglas",
+    "last_name" :   "Fir",
+    "age" :         35,
+    "about":        "I like to build cabinets",
+    "interests":  [ "forestry" ]
+}
+
+-3 检索雇员
+GET /megacorp/employee/1
+返回结果：
+{
+  "_index": "megacorp",
+  "_type": "employee",
+  "_id": "1",
+  "_version": 1,
+  "found": true,
+  "_source": {
+    "first_name": "John",
+    "last_name": "Smith",
+    "age": 25,
+    "about": "I love to go rock climbing",
+    "interests": [
+      "sports",
+      "music"
+    ]
+  }
+}
+-4 轻量搜索检索所有雇员
+GET /megacorp/employee/_search
+返回结果：
+{
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 3,
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "2",
+        "_score": 1,
+        "_source": {
+          "first_name": "Jane",
+          "last_name": "Smith",
+          "age": 32,
+          "about": "I like to collect rock albums",
+          "interests": [
+            "music"
+          ]
+        }
+      },
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "1",
+        "_score": 1,
+        "_source": {
+          "first_name": "John",
+          "last_name": "Smith",
+          "age": 25,
+          "about": "I love to go rock climbing",
+          "interests": [
+            "sports",
+            "music"
+          ]
+        }
+      },
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "3",
+        "_score": 1,
+        "_source": {
+          "first_name": "Douglas",
+          "last_name": "Fir",
+          "age": 35,
+          "about": "I like to build cabinets",
+          "interests": [
+            "forestry"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+-5 条件查询[端点搜索]
+GET /megacorp/employee/_search?q=last_name:Smith
+//_search是一个端点,q是查询符,端点搜索
+返回结果:
+{
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 2,
+    "max_score": 0.2876821,
+    "hits": [
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "2",
+        "_score": 0.2876821,
+        "_source": {
+          "first_name": "Jane",
+          "last_name": "Smith",
+          "age": 32,
+          "about": "I like to collect rock albums",
+          "interests": [
+            "music"
+          ]
+        }
+      },
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "1",
+        "_score": 0.2876821,
+        "_source": {
+          "first_name": "John",
+          "last_name": "Smith",
+          "age": 25,
+          "about": "I love to go rock climbing",
+          "interests": [
+            "sports",
+            "music"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+-6.条件查询[表达式搜索]
+GET /megacorp/employee/_search
+{
+    "query" : {
+        "match" : {
+            "last_name" : "Smith"
+        }
+    }
+}
+结果同上
+
+-7.条件查询[更加复杂的结构化查询]
+//使用了filter过滤器
+GET /megacorp/employee/_search
+{
+    "query" : {
+        "bool": {
+            "must": {
+                "match" : {
+                    "last_name" : "smith" 
+                }
+            },
+            "filter": {
+                "range" : {
+                    "age" : { "gt" : 30 } 
+                }
+            }
+        }
+    }
+}
+返回结果：
+{
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 1,
+    "max_score": 0.2876821,
+    "hits": [
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "2",
+        "_score": 0.2876821,
+        "_source": {
+          "first_name": "Jane",
+          "last_name": "Smith",
+          "age": 32,
+          "about": "I like to collect rock albums",
+          "interests": [
+            "music"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+-8 全文搜索，一般数据库都很难做到的
+GET /megacorp/employee/_search
+{
+    "query" : {
+        "match" : {
+            "about" : "rock climbing"     //表示about字段包含rock  或者 climbing的数据，是以单词为基本单位，并且二者是取或,如果只写roc或者limbing，则记录为0,返回的结果会按照相关性排序
+        }
+    }
+}
+返回结果:
+{
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 2,
+    "max_score": 0.5753642,
+    "hits": [
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "1",
+        "_score": 0.5753642,
+        "_source": {
+          "first_name": "John",
+          "last_name": "Smith",
+          "age": 25,
+          "about": "I love to go rock climbing",  //rock climbing   查询单位分别是rock 和climbing
+          "interests": [
+            "sports",
+            "music"
+          ]
+        }
+      },
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "2",
+        "_score": 0.2876821,
+        "_source": {
+          "first_name": "Jane",
+          "last_name": "Smith",
+          "age": 32,
+          "about": "I like to collect rock albums",  //rock albums
+          "interests": [
+            "music"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+-9. 短语搜索，查询rock climbing组合与的数据
+GET /megacorp/employee/_search
+{
+    "query" : {
+        "match_phrase" : {
+            "about" : "rock climbing"
+        }
+    }
+}
+
+-10. 高亮搜索
+GET /megacorp/employee/_search
+{
+    "query" : {
+        "match_phrase" : {
+            "about" : "rock climbing"
+        }
+    },
+    "highlight": {
+        "fields" : {
+            "about" : {}
+        }
+    }
+}
+结果:
+{
+  "took": 50,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 1,
+    "max_score": 0.5753642,
+    "hits": [
+      {
+        "_index": "megacorp",
+        "_type": "employee",
+        "_id": "1",
+        "_score": 0.5753642,
+        "_source": {
+          "first_name": "John",
+          "last_name": "Smith",
+          "age": 25,
+          "about": "I love to go rock climbing",
+          "interests": [
+            "sports",
+            "music"
+          ]
+        },
+        "highlight": {
+          "about": [
+            "I love to go <em>rock</em> <em>climbing</em>"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+-11.分析-聚合
+//关键字 aggs 聚合,按照interest字段聚合group by
+GET /megacorp/employee/_search
+{
+  "aggs": {
+    "all_interests": {
+      "terms": { "field": "interests" }
+    }
+  }
+}
+返回结果：
+//报错，因为在es6以后，需要开启fielddata
+{
+  "error": {
+    "root_cause": [
+      {
+        "type": "illegal_argument_exception",
+        "reason": "Fielddata is disabled on text fields by default. Set fielddata=true on [interests] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead."
+      }
+    ],
+    "type": "search_phase_execution_exception",
+    "reason": "all shards failed",
+    "phase": "query",
+    "grouped": true,
+    "failed_shards": [
+      {
+        "shard": 0,
+        "index": "megacorp",
+        "node": "LDw_Ev83Sq6L788ZApzm3g",
+        "reason": {
+          "type": "illegal_argument_exception",
+          "reason": "Fielddata is disabled on text fields by default. Set fielddata=true on [interests] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead."
+        }
+      }
+    ]
+  },
+  "status": 400
+}
+举措:
+PUT megacorp/_mapping/employee/
+{
+  "properties": {
+    "interests": { 
+      "type":     "text",
+      "fielddata": true
+    }
+  }
+}
+
+再执行聚合返回结果:
+...
+"aggregations": {
+    "all_interests": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "music",
+          "doc_count": 2
+        },
+        {
+          "key": "forestry",
+          "doc_count": 1
+        },
+        {
+          "key": "sports",
+          "doc_count": 1
+        }
+      ]
+    }
+  }
+  ...
+  
+-12.聚合加上条件
+  //限定聚合的范围在lastname是smith的雇员里
+  GET /megacorp/employee/_search
+{
+  "query": {
+    "match": {
+      "last_name": "smith"
+    }
+  },
+  "aggs": {
+    "all_interests": {
+      "terms": {
+        "field": "interests"
+      }
+    }
+  }
+}
+  
+  结果：
+  ...
+  "aggregations": {
+    "all_interests": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "music",
+          "doc_count": 2
+        },
+        {
+          "key": "sports",
+          "doc_count": 1
+        }
+      ]
+	  ...
+	  
+-13 聚合嵌套
+//查询喜欢某个爱好的平均年龄
+GET /megacorp/employee/_search
+{
+    "aggs" : {
+        "all_interests" : {
+            "terms" : { "field" : "interests" },
+            "aggs" : {
+                "avg_age" : {
+                    "avg" : { "field" : "age" }
+                }
+            }
+        }
+    }
+}
+结果：
+...
+"aggregations": {
+    "all_interests": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "music",
+          "doc_count": 2,
+          "avg_age": {
+            "value": 28.5
+          }
+        },
+        {
+          "key": "forestry",
+          "doc_count": 1,
+          "avg_age": {
+            "value": 35
+          }
+        },
+        {
+          "key": "sports",
+          "doc_count": 1,
+          "avg_age": {
+            "value": 25
+          }
+        }
+      ]
+...
+
+二.集群
+1.集群健康
+GET /_cluster/health
+
+GET  /_cat/shards 查看分片的状态，unsign
+
+三.文档元数据
+_index
+文档在哪存放
+_type
+文档表示的对象类别
+_id
+文档唯一标识
+
+五.映射与分析
+1.创建索引，指定域，并添加分词器，添加合并新的域
+PUT /gb 
+{
+  "mappings": {
+    "tweet" : {
+      "properties" : {
+        "tweet" : {
+          "type" :    "text",        #为text的tweet指定了分词
+          "analyzer": "english"
+        },
+        "date" : {
+          "type" :   "date"
+        },
+        "name" : {
+          "type" :   "text"
+        },
+        "user_id" : {
+          "type" :   "long"
+        }
+      }
+    }
+  }
+}
+
+#添加一个域，因为已经建好的域是不可修改的，所以无须重复地显示已经有的域
+PUT /gb/_mapping/tweet
+{
+  "properties" : {
+    "tag" : {
+      "type" :    "tex",
+      "index":    "not_analyzed"
+    }
+  }
+}
+
+基础入门-请求体查询:
+1.空查询
+GET /_search
+{} 
+
+2.在多个index，type里进行空查询
+GET /index_2024*/ty1,ty2/_search
+{}
+
+3.设置页码和尺寸
+GET /_search
+{
+"from":30,
+"size":10
+} 
+
+4.完整的请求查询
+GET /_search
+{
+    "query": {
+        "match": {
+            "tweet": "elasticsearch"
+        }
+    }
+}
+
+
+//有的地方不支持get带请求体，所以兼容POST
+POST /_search
+{
+"from":30,
+"size":10
+}
+5.multi_match 查询编辑
+multi_match 查询可以在多个字段上执行相同的 match 查询：
+{
+    "multi_match": {
+        "query":    "full text search",
+        "fields":   [ "title", "body" ]
+    }
+}
+
+6.range 查询编辑
+range 查询找出那些落在指定区间内的数字或者时间：
+{
+    "range": {
+        "age": {
+            "gte":  20,
+            "lt":   30
+        }
+    }
+}
+
+7.term 查询编辑
+term 查询被用于精确值 匹配，这些精确值可能是数字、时间、布尔或者那些 not_analyzed 的字符串：
+{ "term": { "age":    26           }}
+{ "term": { "date":   "2014-09-01" }}
+{ "term": { "public": true         }}
+{ "term": { "tag":    "full_text"  }}
+
+8.terms 查询编辑
+terms 查询和 term 查询一样，但它允许你指定多值进行匹配。如果这个字段包含了指定值中的任何一个值，那么这个文档满足条件：
+{ "terms": { "tag": [ "search", "full_text", "nosql" ] }}
+
+9.exists 查询和 missing 查询编辑
+exists 查询和 missing 查询被用于查找那些指定字段中有值 (exists) 或无值 (missing) 的文档。这与SQL中的 IS_NULL (missing) 和 NOT IS_NULL (exists) 在本质上具有共性：
+{
+    "exists":   {
+        "field":    "title"
+    }
+}
+
+10.复合条件
+{
+    "bool": {
+        "must":     { "match": { "title": "how to make millions" }},
+        "must_not": { "match": { "tag":   "spam" }},
+        "should": [
+            { "match": { "tag": "starred" }}
+        ],
+        "filter": {
+          "range": { "date": { "gte": "2014-01-01" }} 
+        }
+    }
+}
+
+11.对查询结果排序
+GET /_search
+{
+    "query" : {
+        "bool" : {
+            "must":   { "match": { "tweet": "manage text search" }},
+            "filter" : { "term" : { "user_id" : 2 }}
+        }
+    },
+    "sort": [
+        { "date":   { "order": "desc" }},
+        { "_score": { "order": "desc" }}
+    ]
+}
+六.结构化查询
+1.精确化查询
+#先批量插入数据
+POST /my_store/products/_bulk
+{ "index": { "_id": 1 }}
+{ "price" : 10, "productID" : "XHDK-A-1293-#fJ3" }
+{ "index": { "_id": 2 }}
+{ "price" : 20, "productID" : "KDKE-B-9947-#kL5" }
+{ "index": { "_id": 3 }}
+{ "price" : 30, "productID" : "JODL-X-1937-#pV7" }
+{ "index": { "_id": 4 }}
+{ "price" : 30, "productID" : "QQPX-R-3956-#aD8" }
+
+#精确查找价格30的产品
+{
+    "term" : {
+        "price" : 20
+    }
+}
