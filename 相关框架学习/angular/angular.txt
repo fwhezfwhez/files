@@ -1,0 +1,5 @@
+1. npm install -g @angular/cli
+
+2. ng new hellowold
+
+3. ng generate component heroes

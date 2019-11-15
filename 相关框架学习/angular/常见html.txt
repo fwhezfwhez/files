@@ -1,0 +1,77 @@
+1. 输入框
+<div>
+    <label>name:
+      <input [(ngModel)]="hero.name" placeholder="name"/>
+    </label>
+</div>
+
+2. 无序列迭代
+  <ul>
+    <li *ngFor="let hero of heroes">
+      {{ hero }}
+    </li>
+  </ul>
+
+3. 条件显示
+<p *ngIf="heroes.length > 3">There are many heroes!</p>
+
+4. attr绑定-- 当元素不包含对应的property时，只能用attr绑定
+attr.colspan
+
+5. ngstyle 样式绑定
+<div [ngStyle]="currentStyles">
+  This div is initially italic, normal weight, and extra large (24px).
+</div>
+
+currentStyles = {
+    'font-style':  this.canSave      ? 'italic' : 'normal',
+    'font-weight': !this.isUnchanged ? 'bold'   : 'normal',
+    'font-size':   this.isSpecial    ? '24px'   : '12px'
+}
+
+6. ngModel, 表单元素双向绑定, 需要formsModule
+<input [(ngModel)]="currentHero.name">
+
+7. ngif 防止空值 
+<div *ngIf="nullHero">Hello, {{nullHero.name}}</div>
+
+8.ngfor 
+<div *ngFor="let hero of heroes">{{hero.name}}</div>
+<div *ngFor="let hero of heroes; let i=index">{{i + 1}} - {{hero.name}}</div>
+
+9. ngswitch
+<div [ngSwitch]="currentHero.emotion">
+  <app-happy-hero    *ngSwitchCase="'happy'"    [hero]="currentHero"></app-happy-hero>
+  <app-sad-hero      *ngSwitchCase="'sad'"      [hero]="currentHero"></app-sad-hero>
+  <app-confused-hero *ngSwitchCase="'confused'" [hero]="currentHero"></app-confused-hero>
+  <app-unknown-hero  *ngSwitchDefault           [hero]="currentHero"></app-unknown-hero>
+</div>
+
+9. 声明模板引用并使用
+<input #phone placeholder="phone number">
+<button (click)="callPhone(phone.value)">Call</button>
+
+10. 使用?. 保护null值不崩溃
+The null hero's name is {{nullHero?.name}}
+
+11. 父子组件通道:
+事件notify与属性product:
+  子:
+     export class ProductAlertsComponent implements OnInit {
+	  @Input() product;
+	  @Output() notify = new EventEmitter();
+	  constructor() { }
+
+	  ngOnInit() {
+	  }
+
+	}
+
+	<p *ngIf="product.price > 700">
+	  <button (click)="notify.emit()">Notify Me</button>
+	  <button>Notify Me</button>
+	</p>  
+  父:
+      <app-product-alerts
+          [product]="product" (notify)="onNotify()">
+      </app-product-alerts>

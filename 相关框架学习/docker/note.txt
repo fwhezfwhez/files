@@ -113,3 +113,10 @@ docker cp main reverent_noyce:/main 将主机main，传给容器的/main
 
 15. 在已运行容器里，修改restart策略
 docker update –-restart=always xxx 
+
+16. 挂载
+docker run -itd --rm -v G:/go_workspace/GOPATH/src/test_X/test_docker_volume/config:/config 424d    其中，424d为镜像id前缀
+容器上的挂载点不存在时，会创建
+
+17. 设置环境变量
+docker run -tid --restart=on-failure:20 -p 2379:2379 -p 2380:2380 --env ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379 --env ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379 etcd:3.3

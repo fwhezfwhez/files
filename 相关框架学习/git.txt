@@ -66,3 +66,13 @@ git add .
 git remote add origin https://github.com/xx/x
 git remote  update
 git checkout master
+
+15. 打版本并推送
+git tag v1.0.0
+git push origin v1.0.0
+git push origin :refs/tags/v1.0.0 删除远程仓库标签
+
+16. 查看远程分支的几条commit记录
+git fetch origin
+
+git log origin/dev -n 3

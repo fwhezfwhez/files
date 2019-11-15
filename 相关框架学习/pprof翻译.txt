@@ -56,7 +56,7 @@ func main() {
 ```
 
 先执行go run main.go --cpuprofile=cpu.prof --memprofile=mem.prof,在该路径下产生了mem.prof 和 cpu.prof剖面文件
-`go tool pprof main.go cpu.prof` 进入分析 cpu分析  // 同理 go tool pprof main.go mem.prof
+`go tool pprof main.go cpu.prof` 进入分析 cpu分析, 无main入口时 go tool pprof cpu.prof  // 同理 go tool pprof main.go mem.prof，无main入口时，go tool pprof mem.prof
 
 `top19`  取前19个相关节点
 ```go
